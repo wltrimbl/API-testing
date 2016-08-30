@@ -1,0 +1,1 @@
+curl -X POST -d order:function "http://api.metagenomics.anl.gov/1/m5nr/accession" curl -X POST -d data:[YP_003268079.1 "http://api.metagenomics.anl.gov/1/m5nr/accession" curl -X POST -d COG1764] "http://api.metagenomics.anl.gov/1/m5nr/accession"

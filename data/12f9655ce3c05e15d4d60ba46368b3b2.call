@@ -1,0 +1,1 @@
+curl -X POST -d source:KEGG "http://api.metagenomics.anl.gov/1/m5nr/organism" curl -X POST -d order:accession "http://api.metagenomics.anl.gov/1/m5nr/organism" curl -X POST -d data:[akkermansia "http://api.metagenomics.anl.gov/1/m5nr/organism" curl -X POST -d yersinia] "http://api.metagenomics.anl.gov/1/m5nr/organism"
