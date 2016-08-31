@@ -127,6 +127,7 @@ def run_tests(testlist):
                 test_results[callhash]["status"] = ok
                 test_results[callhash]["call"] = call
                 test_results[callhash]["mesg"] = mesg
+                test_results[callhash]["time"] = elapsed
             else: 
                 if ok:
                     os.remove(fnout)
