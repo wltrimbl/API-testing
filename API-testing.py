@@ -6,6 +6,10 @@ import urllib2, json, sys, md5, os
 from optparse import OptionParser
 from time import time
 import subprocess
+import json
+
+
+
 API_URL = "http://api.metagenomics.anl.gov/1"
 
 SKIP = ["48f15d5aae95892edb9bae03988573fa",
@@ -13,6 +17,8 @@ SKIP = ["48f15d5aae95892edb9bae03988573fa",
         'a78c50dc4b81f0d02fc0391532cc61f4',
         'c0a6a295563e01e7c42628cfe81b7431',
         '19fe36c957ab88a6b5a567d885db445c'] # these take too long
+
+
 
 def sanitize(c):
     '''Function to remove escaping from API example strings'''
@@ -92,6 +98,7 @@ def check_ok(stem, dir1, blesseddir):
 
 def run_tests(testlist):
     '''run tests for list of URIs in testlist'''
+    test_results = {}
     for test in testlist:
         if test[0] not in SKIP or not FAST:
             callhash, call, name, name2, description = test
@@ -115,10 +122,17 @@ def run_tests(testlist):
             elapsed = time() - start
             fout.close()
             ok, mesg = check_ok(callhash, WORKING, BLESSED)
-            if ok:
-                os.remove(fnout)
-            else:
-                print "TESTFAIL", callhash, call, mesg
+            if USE_JSON:
+                test_results[callhash] ={}
+                test_results[callhash]["status"] = ok
+                test_results[callhash]["call"] = call
+                test_results[callhash]["mesg"] = mesg
+            else: 
+                if ok:
+                    os.remove(fnout)
+                else:
+                    print "TESTFAIL", callhash, call, mesg
+                
             ftest = open(WORKING+"/"+callhash + ".test", "w")
             if VERBOSE:
                 print repr(ok)+mesg
@@ -130,6 +144,10 @@ def run_tests(testlist):
         else:
             if VERBOSE:
                 print "skipping", test[0]
+                
+                
+    if USE_JSON:
+        print json.dumps(test_results)
 
 def get_example_calls(base_url):
     topleveljsonobjects = {}
@@ -163,6 +181,8 @@ if __name__ == '__main__':
     parser = OptionParser(usage)
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
                       default=False, help="Verbose")
+    parser.add_option("-j", "--json", dest="use_json", action="store_true",
+                     default=False, help="use output format JSON")
     parser.add_option("-b", "--blesseddir", dest="blesseddir", type="str",
                       default="data", help="Location of stored (good) results")
     parser.add_option("-w", "--workdingdir", dest="workingdir", type="str",
@@ -178,6 +198,7 @@ if __name__ == '__main__':
     WORKING = opts.workingdir
     TESTS = opts.tests
     FAST = opts.fast
+    USE_JSON = opts.use_json
     # create working dir if it does not exist
     if not os.path.isdir(WORKING):
         os.makedirs(WORKING)
