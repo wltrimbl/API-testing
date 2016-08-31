@@ -6,11 +6,17 @@ API at http://api.metagenomics.anl.gov/1,
 invokes them with curl, and compares the outputs to
 previously saved outputs in the data directory. 
 
+```bash
 API-testing.py -t   # generates a list of the example API calls
+```
 
-This invokation
-API-testing.py -f -w work  # runs tests and puts output in word directoery
+This invokation runs tests and puts output in word directoery
 genereates files 
+```bash
+API-testing.py -f -w work
+```
+
+```bash
 f7f488249d0fbc943fa0c9ca27707a1c.call  # contains the URI
 f7f488249d0fbc943fa0c9ca27707a1c.err   # HTTP headers
 f7f488249d0fbc943fa0c9ca27707a1c.test  # judgement pass/fail
@@ -20,3 +26,12 @@ additionally, if the test fails, the script generates
 f7f488249d0fbc943fa0c9ca27707a1c.out1  and 
 f7f488249d0fbc943fa0c9ca27707a1c.out2  
 to facilitate debugging the differences.
+```
+
+
+# build
+
+
+```bash
+docker build -t mgrast/api-testing .
+```
