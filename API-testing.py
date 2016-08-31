@@ -52,7 +52,10 @@ def check_ok(stem, dir1, blesseddir):
     '''Populates a file called WORKING + stem + ".test" with symbols
     indicating which tests for similarity of output passed'''
     f1 = open(dir1+"/"+stem+".out").read()
-    f2 = open(blesseddir+"/"+stem+".out").read()
+    try:
+        f2 = open(blesseddir+"/"+stem+".out").read()
+    except IOError:
+        f2 = ""
     md5A = md5.new(f1).hexdigest()
     md5B = md5.new(f2).hexdigest()
     if len(f1) == 0 and len(f2) == 0:
@@ -60,7 +63,9 @@ def check_ok(stem, dir1, blesseddir):
     if md5A != md5B:
         if len(f1) == 0:
             return False, "emptyoutput"
-        if len(f1) > 0 and len(f2) > 0 and f1[0] == "{" and f2[0] == "{":
+        elif len(f2) == 0:
+            return False, "emptyreference"
+        elif len(f1) > 0 and len(f2) > 0 and f1[0] == "{" and f2[0] == "{":
             j1 = json.loads(f1)
             j2 = json.loads(f2)
             if "date" in j1.keys():
