@@ -29,9 +29,11 @@ to facilitate debugging the differences.
 ```
 
 
-# build
+# build & run
 
 
 ```bash
 docker build -t mgrast/api-testing .
+docker run -ti --rm --name api-testing mgrast/api-testing
 ```
+
