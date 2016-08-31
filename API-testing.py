@@ -18,10 +18,14 @@ def sanitize(c):
     '''Function to remove escaping from API example strings'''
     clist = c.split()
     for i, c in enumerate(clist):
-        if c[0] == "'" and c[-1] == "'":
+        if c[0] == "'" and c[-1] == "'":  # remove items with single quotes
             clist[i] = c[1:-1]
-        if c[0] == '"' and c[-1] == '"':
+        if c[0] == '"' and c[-1] == '"':  # remove items with double quotes
             clist[i] = c[1:-1]
+    for i, c in enumerate(clist):  # remove spaces within '-escaped examples
+        for j in range(len(clist)-1, i-1, -1):
+            if c[0] == "'" and clist[j][-1] == "'":
+                clist = clist[:i] + ["".join(clist[i:j+1])[1:-1]] + clist[j+1:]
     return " ".join(clist)
 
 def getmeajsonobject(url):
@@ -66,13 +70,23 @@ def check_ok(stem, dir1, blesseddir):
             if j1 == j2:
                 return True, "JSONmatch"
             else:
-                return False, "JSONdiff {:d}, {:d}".format(len(f1), len(f2))
+                fj1 = open(dir1+"/"+stem+".out1", "w")
+                fj2 = open(dir1+"/"+stem+".out2", "w")
+                fj1.write(json.dumps(j1, sort_keys=True))
+                fj2.write(json.dumps(j2, sort_keys=True))
+                fj1.close()
+                fj2.close()
+                if len(f1) == len(f2):
+                    return True, "samesizeJSON".format(len(f1), len(f2))
+                else:
+                    return False, "JSONdiff {:d}, {:d}".format(len(f1), len(f2))
         else:
-            return False, "not json, {:d}, {:d}".format(len(f1), len(f2))
+            return False, "diffnotjson, {:d}, {:d}".format(len(f1), len(f2))
     else:
-         return True, "MD5match"
+        return True, "MD5match"
 
 def run_tests(testlist):
+    '''run tests for list of URIs in testlist'''
     for test in testlist:
         if test[0] not in SKIP or not FAST:
             callhash, call, name, name2, description = test
@@ -89,7 +103,7 @@ def run_tests(testlist):
                 command = sanitize(command)
             else:
                 command = "curl {} -s -D {}.err".format(call, fnerr)
-            if VERBOSE or 1:
+            if VERBOSE:
                 print "trying", callhash, command
             start = time()
             subprocess.call(str(command).split(), stdout=fout, shell=shell)
@@ -99,7 +113,7 @@ def run_tests(testlist):
             if ok:
                 os.remove(fnout)
             else:
-                pass
+                print "TESTFAIL", callhash, call, mesg
             ftest = open(WORKING+"/"+callhash + ".test", "w")
             if VERBOSE:
                 print repr(ok)+mesg
@@ -109,7 +123,8 @@ def run_tests(testlist):
             ftime.write(str(elapsed)+"\n")
             ftime.close()
         else:
-            print "skipping", test[0]
+            if VERBOSE:
+                print "skipping", test[0]
 
 def get_example_calls(base_url):
     topleveljsonobjects = {}
@@ -130,7 +145,8 @@ def get_example_calls(base_url):
                     n = request["name"]
                     example = request["example"][0].replace("auth_key", "")
                     callhash = md5.new(request["example"][0]).hexdigest()
-                    requestlist.append((callhash, request["example"][0], name, request["name"], request["description"]))
+                    requestlist.append((callhash, request["example"][0], name,
+                                        request["name"], request["description"]))
                 except KeyError:
                     pass
         except TypeError:
@@ -149,7 +165,7 @@ if __name__ == '__main__':
     parser.add_option("-t", "--test", dest="tests", action="store_true",
                       default=False, help="don't do it, just print tests")
     parser.add_option("-f", "--fast", dest="fast", action="store_true",
-                      default=False, help="fast-skip slow tests")
+                      default=False, help="skip slow tests")
 
     (opts, args) = parser.parse_args()
     VERBOSE = opts.verbose
@@ -157,7 +173,12 @@ if __name__ == '__main__':
     WORKING = opts.workingdir
     TESTS = opts.tests
     FAST = opts.fast
-
+    # create working dir if it does not exist
+    if not os.path.isdir(WORKING):
+        os.makedirs(WORKING)
+    # get list of example API calls from API
+    if VERBOSE:
+        print "Fetching examples"
     tests = get_example_calls(API_URL)
     if  TESTS:
         print_tests(tests)
