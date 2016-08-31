@@ -1,0 +1,1 @@
+curl -X POST -d source:KEGG "http://api.metagenomics.anl.gov/1/m5nr/sequence" curl -X POST -d order:source "http://api.metagenomics.anl.gov/1/m5nr/sequence" curl -X POST -d data:[MAGENHQWQGSIL "http://api.metagenomics.anl.gov/1/m5nr/sequence" curl -X POST -d MAGENHQWQGSIL] "http://api.metagenomics.anl.gov/1/m5nr/sequence"

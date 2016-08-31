@@ -1,0 +1,1 @@
+curl -X POST -d source:GenBank "http://api.metagenomics.anl.gov/1/m5nr/function" curl -X POST -d limit:50 "http://api.metagenomics.anl.gov/1/m5nr/function" curl -X POST -d data:[sulfatase "http://api.metagenomics.anl.gov/1/m5nr/function" curl -X POST -d phosphatase] "http://api.metagenomics.anl.gov/1/m5nr/function"

@@ -1,0 +1,1 @@
+curl -X POST -F "project=mgp123" -F "upload=@metadata.xlsx" "http://api.metagenomics.anl.gov/1/metadata/update"

@@ -1,0 +1,8 @@
+HTTP/1.1 200 OK
+Server: nginx/1.11.1
+Date: Tue, 30 Aug 2016 16:41:19 GMT
+Content-Type: application/json; charset=ISO-8859-1
+Content-Length: 1770
+Connection: keep-alive
+Access-control-allow-origin: *
+
