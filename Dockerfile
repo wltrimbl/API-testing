@@ -1,12 +1,17 @@
 # MG-RAST API-testing
 
-FROM ubuntu:14.04
+FROM alpine:3.4
 
-RUN apt-get update && apt-get install -y \
-  python \
-  curl 
+RUN apk update && apk add curl python
+
+# FROM ubuntu 14.04
+#RUN apt-get update && apt-get install -y \
+#  python \
+#  curl 
 
 COPY . /root/
 
-# RUN /root/API-testing.py -f -w /root/test -b /root/data
+WORKDIR /root
+
+CMD ["/root/API-testing.py","-f","-w /root/test", "-b /root/data"]
 
