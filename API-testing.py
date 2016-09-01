@@ -98,8 +98,14 @@ def check_ok(stem, dir1, blesseddir):
 
 def run_tests(testlist):
     '''run tests for list of URIs in testlist'''
-    test_results = {}
+    
+    result_hash = {}
+    if USE_JSON:
+        result_hash["tests"]={}
+        result_hash["epoch_utc_start"] = time()
+        
     for test in testlist:
+        
         if test[0] not in SKIP or not FAST:
             callhash, call, name, name2, description = test
             fncall = WORKING + "/" + callhash + ".call"
@@ -123,11 +129,11 @@ def run_tests(testlist):
             fout.close()
             ok, mesg = check_ok(callhash, WORKING, BLESSED)
             if USE_JSON:
-                test_results[callhash] ={}
-                test_results[callhash]["status"] = ok
-                test_results[callhash]["call"] = call
-                test_results[callhash]["mesg"] = mesg
-                test_results[callhash]["time"] = elapsed
+                result_hash["tests"][callhash] ={}
+                result_hash["tests"][callhash]["status"] = ok
+                result_hash["tests"][callhash]["call"] = call
+                result_hash["tests"][callhash]["mesg"] = mesg
+                result_hash["tests"][callhash]["time"] = elapsed
             else: 
                 if ok:
                     os.remove(fnout)
@@ -148,7 +154,8 @@ def run_tests(testlist):
                 
                 
     if USE_JSON:
-        print json.dumps(test_results)
+        result_hash["epoch_utc_end"] = time()
+        print json.dumps(result_hash)
 
 def get_example_calls(base_url):
     topleveljsonobjects = {}
