@@ -190,7 +190,7 @@ if __name__ == '__main__':
     parser = OptionParser(usage)
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
                       default=False, help="Verbose")
-    parser.add_option("-j", "--json_file", dest="json_file", type="str",
+    parser.add_option("-j", "--jsonfile", dest="json_file", type="str",
                      default="", help="use output format JSON")
     parser.add_option("-b", "--blesseddir", dest="blesseddir", type="str",
                       default="data", help="Location of stored (good) results")
