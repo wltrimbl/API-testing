@@ -100,7 +100,7 @@ def run_tests(testlist):
     '''run tests for list of URIs in testlist'''
     
     result_hash = {}
-    if USE_JSON:
+    if JSON_FILE:
         result_hash["tests"]={}
         result_hash["epoch_utc_start"] = time()
         
@@ -128,7 +128,7 @@ def run_tests(testlist):
             elapsed = time() - start
             fout.close()
             ok, mesg = check_ok(callhash, WORKING, BLESSED)
-            if USE_JSON:
+            if JSON_FILE:
                 result_hash["tests"][callhash] ={}
                 result_hash["tests"][callhash]["status"] = ok
                 result_hash["tests"][callhash]["call"] = call
@@ -153,9 +153,10 @@ def run_tests(testlist):
                 print "skipping", test[0]
                 
                 
-    if USE_JSON:
+    if JSON_FILE:
         result_hash["epoch_utc_end"] = time()
-        print json.dumps(result_hash)
+        with open(JSON_FILE, 'w') as outfile:
+            json.dump(result_hash, outfile)
 
 def get_example_calls(base_url):
     topleveljsonobjects = {}
@@ -189,8 +190,8 @@ if __name__ == '__main__':
     parser = OptionParser(usage)
     parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
                       default=False, help="Verbose")
-    parser.add_option("-j", "--json", dest="use_json", action="store_true",
-                     default=False, help="use output format JSON")
+    parser.add_option("-j", "--json_file", dest="json_file", type="str",
+                     default="", help="use output format JSON")
     parser.add_option("-b", "--blesseddir", dest="blesseddir", type="str",
                       default="data", help="Location of stored (good) results")
     parser.add_option("-w", "--workdingdir", dest="workingdir", type="str",
@@ -206,7 +207,7 @@ if __name__ == '__main__':
     WORKING = opts.workingdir
     TESTS = opts.tests
     FAST = opts.fast
-    USE_JSON = opts.use_json
+    JSON_FILE = opts.json_file
     # create working dir if it does not exist
     if not os.path.isdir(WORKING):
         os.makedirs(WORKING)
