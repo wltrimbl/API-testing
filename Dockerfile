@@ -13,5 +13,5 @@ COPY . /root/
 
 WORKDIR /root
 
-CMD ["/root/API-testing.py", "--fast", "-w /root/test", "-b /root/data", "--json"]
+CMD ["/root/API-testing.py", "--fast", "-w /root/test", "-b /root/data", "--json_file /tmp_host/api-test.json"]
 
