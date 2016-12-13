@@ -57,11 +57,16 @@ def print_tests(testlist):
 def check_ok(stem, dir1, blesseddir):
     '''Populates a file called WORKING + stem + ".test" with symbols
     indicating which tests for similarity of output passed'''
-    f1 = open(dir1+"/"+stem+".out").read()
+    try:
+        f1 = open(dir1+"/"+stem+".out").read()
+    except Exception as e:
+        return False, "Exception: "+str(e)
+        
     try:
         f2 = open(blesseddir+"/"+stem+".out").read()
-    except IOError:
-        f2 = ""
+    except Exception as e:
+        return False, "Exception: "+str(e)
+        
     md5A = md5.new(f1).hexdigest()
     md5B = md5.new(f2).hexdigest()
     if len(f1) == 0 and len(f2) == 0:
@@ -142,7 +147,7 @@ def run_tests(testlist):
                 
             ftest = open(WORKING+"/"+callhash + ".test", "w")
             if VERBOSE:
-                print repr(ok)+mesg
+                print "result: "+repr(ok)+mesg
             ftest.write(repr(ok)+mesg+"\n")
             ftest.close()
             ftime = open(WORKING+"/"+callhash + ".time", "w")
@@ -165,10 +170,10 @@ def get_example_calls(base_url):
     listofapiurls = [resources["url"]  for resources in json_api_calls["resources"]]
     for resourceurl in listofapiurls:
         if VERBOSE:
-            sys.stderr.write(resourceurl+"\n")
+            sys.stderr.write("resourceurl: "+resourceurl+"\n")
         topleveljsonobjects[resourceurl] = getmeajsonobject(resourceurl)
     if VERBOSE:
-        print listofapiurls
+        print "listofapiurls: ", listofapiurls
     for resource in listofapiurls:
         name = resource.split("/")[-1]
         try:
