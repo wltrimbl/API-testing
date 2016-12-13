@@ -1,0 +1,1 @@
+curl -X POST -d '{"raw":0,"cluster":"mcquitty","columns": ["mgm4441619.3","mgm4441656.4","mgm4441680.3","mgm4441681.3"], "rows": ["Eukaryota","Bacteria","Archaea"], "data": [[135,410,848,1243],[4397,6529,71423,204413],[1422,2156,874,1138]]}' "http://api.metagenomics.anl.gov/compute/heatmap"

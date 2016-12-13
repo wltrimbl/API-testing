@@ -1,0 +1,1 @@
+curl -X POST -F "metagenome=mgm12345" -F "metagenome=mgm67890" -F "upload=@metadata.xlsx" "http://api.metagenomics.anl.gov/metadata/import"

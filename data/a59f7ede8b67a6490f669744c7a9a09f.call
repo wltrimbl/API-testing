@@ -1,0 +1,1 @@
+curl -X POST -d '{"source":"KO","type":"function","data":["000821a2e2f63df1a3873e4b280002a8","15bf1950bd9867099e72ea6516e3d602"]}' "http://api.metagenomics.anl.gov/annotation/sequence/mgm4447943.3"

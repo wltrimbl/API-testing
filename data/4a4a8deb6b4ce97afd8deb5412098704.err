@@ -1,0 +1,9 @@
+HTTP/1.1 200 OK
+Server: nginx/1.11.1
+Date: Tue, 13 Dec 2016 19:52:30 GMT
+Content-Type: application/x-download
+Content-Length: 51217959
+Connection: keep-alive
+Access-Control-Allow-Origin: *
+Content-Disposition: attachment;filename=mgm4447943.3.350.genecalling.faa
+

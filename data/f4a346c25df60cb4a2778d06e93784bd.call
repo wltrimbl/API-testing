@@ -1,0 +1,1 @@
+curl -X GET -H "auth: auth_key" "http://api.metagenomics.anl.gov/inbox/pending?queued&completed"

@@ -1,0 +1,1 @@
+curl -X POST -d '{"order":"function","data":["IPR001478","TIGR02124"]}' "http://api.metagenomics.anl.gov/m5nr/alias"

@@ -1,0 +1,1 @@
+curl -X POST -H "auth: auth_key" -F "seq_file=cfb3d9e1-c9ba-4260-95bf-e410c57b1e49" -F "barcode_file=cfb3d9e1-c9ba-4260-95bf-e410c57b1e49" "http://api.metagenomics.anl.gov/inbox/demultiplex"
