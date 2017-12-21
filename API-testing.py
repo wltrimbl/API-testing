@@ -16,7 +16,11 @@ SKIP = ["48f15d5aae95892edb9bae03988573fa",
         '3bfa44d3dad4e2af12bab2601cfa8138',
         'a78c50dc4b81f0d02fc0391532cc61f4',
         'c0a6a295563e01e7c42628cfe81b7431',
-        '19fe36c957ab88a6b5a567d885db445c'] # these take too long
+        '19fe36c957ab88a6b5a567d885db445c', 
+        '084905a84b75b6860c877a5804453829',
+        '23bd3abcc793f83d87e16913c99ef5ac',
+        '376206640f1592ac9302e30d7cf8fabb',
+        '7017b76a86eee625ec9d954a6149dd12'] # these take too long
 
 
 
@@ -77,8 +81,14 @@ def check_ok(stem, dir1, blesseddir):
         elif len(f2) == 0:
             return False, "emptyreference"
         elif len(f1) > 0 and len(f2) > 0 and f1[0] == "{" and f2[0] == "{":
-            j1 = json.loads(f1)
-            j2 = json.loads(f2)
+            try:            #   in case API returns invalid unicode!
+                j1 = json.loads(f1)
+            except UnicodeDecodeError:
+                j1 = json.loads(f1.decode('latin-1'))
+            try:
+                j2 = json.loads(f2)
+            except UnicodeDecodeError:
+                j2 = json.loads(f2.decode('latin-1'))
             if "date" in j1.keys():
                 j1["date"] = ""
             if "date" in j2.keys():
