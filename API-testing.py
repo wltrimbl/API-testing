@@ -6,8 +6,9 @@ from __future__ import print_function
 import json
 import sys
 import os
+import codecs
 from hashlib import md5
-from optparse import OptionParser
+import argparse
 from time import time
 import subprocess
 
@@ -60,8 +61,10 @@ def getmeajsonobject(url):
         print("Error with HTTP request: %{:d} %{}\n%{}".format(e.code, e.reason, e.read()))
         return None
     opener.addheaders = [('User-agent', 'API-testing.py')]
-
-    jsonobject = opener.read().decode("utf8")
+    try:
+        jsonobject = opener.read().decode("utf8")
+    except UnicodeDecodeError:
+        jsonobject = opener.read().decode("latin-1")
     jsonstructure = json.loads(jsonobject)
     return jsonstructure
 
@@ -74,11 +77,11 @@ def check_ok(stem, dir1, blesseddir):
     '''Populates a file called WORKING + stem + ".test" with symbols
     indicating which tests for similarity of output passed'''
     try:
-        f1 = open(dir1+"/"+stem+".out").read()
+        f1 = codecs.open(dir1+"/"+stem+".out", encoding="utf8").read()
     except Exception as e:
         return False, "Exception: "+str(e)
     try:
-        f2 = open(blesseddir+"/"+stem+".out").read()
+        f2 = codecs.open(blesseddir+"/"+stem+".out", encoding="utf8").read()
     except Exception as e:
         return False, "Exception: "+str(e)
     md5A = md5(f1.encode('utf8')).hexdigest()
@@ -184,8 +187,6 @@ def get_example_calls(base_url):
     json_api_calls = getmeajsonobject(base_url)
     listofapiurls = [resources["url"]  for resources in json_api_calls["resources"]]
     for resourceurl in listofapiurls:
-        if VERBOSE:
-            sys.stderr.write("resourceurl: "+resourceurl+"\n")
         topleveljsonobjects[resourceurl] = getmeajsonobject(resourceurl)
     for resource in listofapiurls:
         name = resource.split("/")[-1]
@@ -195,26 +196,26 @@ def get_example_calls(base_url):
                 example = request["example"][0].replace("auth_key", "")
                 callhash = md5(request["example"][0].encode('utf8')).hexdigest()
                 requestlist.append((callhash, request["example"][0], name,
-                                   request["name"], request["description"]))
+                                    request["name"], request["description"]))
     return requestlist
 
 if __name__ == '__main__':
     usage = "usage: %prog \n  Tests MG-RAST API calls with example invokations in API"
-    parser = OptionParser(usage)
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
-                      default=False, help="Verbose")
-    parser.add_option("-j", "--jsonfile", dest="json_file", type="str",
-                     default="", help="use output format JSON")
-    parser.add_option("-b", "--blesseddir", dest="blesseddir", type="str",
-                      default="data", help="Location of stored (good) results")
-    parser.add_option("-w", "--workdingdir", dest="workingdir", type="str",
-                      default=".", help="Working dir--will be filled with output files")
-    parser.add_option("-t", "--test", dest="tests", action="store_true",
-                      default=False, help="don't do it, just print tests")
-    parser.add_option("-f", "--fast", dest="fast", action="store_true",
-                      default=False, help="skip slow tests")
+    parser = argparse.ArgumentParser(usage)
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true",
+                        default=False, help="Verbose")
+    parser.add_argument("-j", "--jsonfile", dest="json_file", type=str,
+                        default="", help="use output format JSON")
+    parser.add_argument("-b", "--blesseddir", dest="blesseddir", type=str,
+                        default="data", help="Location of stored (good) results")
+    parser.add_argument("-w", "--workdingdir", dest="workingdir", type=str,
+                        default=".", help="Working dir--will be filled with output files")
+    parser.add_argument("-t", "--test", dest="tests", action="store_true",
+                        default=False, help="don't do it, just print tests")
+    parser.add_argument("-f", "--fast", dest="fast", action="store_true",
+                        default=False, help="skip slow tests")
 
-    (opts, args) = parser.parse_args()
+    opts = parser.parse_args()
     VERBOSE = opts.verbose
     BLESSED = opts.blesseddir
     WORKING = opts.workingdir
