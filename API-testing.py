@@ -2,11 +2,23 @@
 '''This script retrieves example API invokations form MG-RAST and compares new results
 against stored return values from the example API calls. '''
 
-import urllib2, json, sys, md5, os
+from __future__ import print_function
+import json
+import sys
+import os
+from hashlib import md5
 from optparse import OptionParser
 from time import time
 import subprocess
-import json
+
+try:  # python3
+    from urllib.parse import urlparse, urlencode, parse_qs
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError
+except ImportError:  # python2
+    from urlparse import urlparse, parse_qs
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError
 
 
 
@@ -16,7 +28,7 @@ SKIP = ["48f15d5aae95892edb9bae03988573fa",
         '3bfa44d3dad4e2af12bab2601cfa8138',
         'a78c50dc4b81f0d02fc0391532cc61f4',
         'c0a6a295563e01e7c42628cfe81b7431',
-        '19fe36c957ab88a6b5a567d885db445c', 
+        '19fe36c957ab88a6b5a567d885db445c',
         '084905a84b75b6860c877a5804453829',
         '23bd3abcc793f83d87e16913c99ef5ac',
         '376206640f1592ac9302e30d7cf8fabb',
@@ -43,20 +55,20 @@ def getmeajsonobject(url):
     if VERBOSE:
         sys.stderr.write("Retrieving %s\n" % url)
     try:
-        opener = urllib2.urlopen(url)
-    except urllib2.HTTPError, e:
-        print "Error with HTTP request: %d %s\n%s" % (e.code, e.reason, e.read())
+        opener = urlopen(url)
+    except HTTPError as e:
+        print("Error with HTTP request: %{:d} %{}\n%{}".format(e.code, e.reason, e.read()))
         return None
     opener.addheaders = [('User-agent', 'API-testing.py')]
 
-    jsonobject = opener.read()
+    jsonobject = opener.read().decode("utf8")
     jsonstructure = json.loads(jsonobject)
     return jsonstructure
 
 def print_tests(testlist):
     for test in testlist:
         callhash, call, name, name2, description = test
-        print callhash, call, description
+        print(callhash, call, description)
 
 def check_ok(stem, dir1, blesseddir):
     '''Populates a file called WORKING + stem + ".test" with symbols
@@ -65,14 +77,12 @@ def check_ok(stem, dir1, blesseddir):
         f1 = open(dir1+"/"+stem+".out").read()
     except Exception as e:
         return False, "Exception: "+str(e)
-        
     try:
         f2 = open(blesseddir+"/"+stem+".out").read()
     except Exception as e:
         return False, "Exception: "+str(e)
-        
-    md5A = md5.new(f1).hexdigest()
-    md5B = md5.new(f2).hexdigest()
+    md5A = md5(f1.encode('utf8')).hexdigest()
+    md5B = md5(f2.encode('utf8')).hexdigest()
     if len(f1) == 0 and len(f2) == 0:
         return True, "matchempty"
     if md5A != md5B:
@@ -113,14 +123,12 @@ def check_ok(stem, dir1, blesseddir):
 
 def run_tests(testlist):
     '''run tests for list of URIs in testlist'''
-    
+
     result_hash = {}
     if JSON_FILE:
-        result_hash["tests"]={}
+        result_hash["tests"] = {}
         result_hash["epoch_utc_start"] = time()
-        
     for test in testlist:
-        
         if test[0] not in SKIP or not FAST:
             callhash, call, name, name2, description = test
             fncall = WORKING + "/" + callhash + ".call"
@@ -137,27 +145,26 @@ def run_tests(testlist):
             else:
                 command = "curl {} -s -D {}.err".format(call, fnerr)
             if VERBOSE:
-                print "trying", callhash, command
+                print("trying", callhash, command)
             start = time()
             subprocess.call(str(command).split(), stdout=fout, shell=shell)
             elapsed = time() - start
             fout.close()
             ok, mesg = check_ok(callhash, WORKING, BLESSED)
             if JSON_FILE:
-                result_hash["tests"][callhash] ={}
+                result_hash["tests"][callhash] = {}
                 result_hash["tests"][callhash]["status"] = ok
                 result_hash["tests"][callhash]["call"] = call
                 result_hash["tests"][callhash]["mesg"] = mesg
                 result_hash["tests"][callhash]["time"] = elapsed
-            else: 
+            else:
                 if ok:
                     os.remove(fnout)
                 else:
-                    print "TESTFAIL", callhash, call, mesg
-                
+                    print("TESTFAIL", callhash, call, mesg)
             ftest = open(WORKING+"/"+callhash + ".test", "w")
             if VERBOSE:
-                print "result: "+repr(ok)+mesg
+                print("result: "+repr(ok)+mesg)
             ftest.write(repr(ok)+mesg+"\n")
             ftest.close()
             ftime = open(WORKING+"/"+callhash + ".time", "w")
@@ -165,9 +172,7 @@ def run_tests(testlist):
             ftime.close()
         else:
             if VERBOSE:
-                print "skipping", test[0]
-                
-                
+                print("skipping", test[0])
     if JSON_FILE:
         result_hash["epoch_utc_end"] = time()
         with open(JSON_FILE, 'w') as outfile:
@@ -182,22 +187,15 @@ def get_example_calls(base_url):
         if VERBOSE:
             sys.stderr.write("resourceurl: "+resourceurl+"\n")
         topleveljsonobjects[resourceurl] = getmeajsonobject(resourceurl)
-    if VERBOSE:
-        print "listofapiurls: ", listofapiurls
     for resource in listofapiurls:
         name = resource.split("/")[-1]
-        try:
-            for request in topleveljsonobjects[resource]["requests"]:
-                try:
-                    n = request["name"]
-                    example = request["example"][0].replace("auth_key", "")
-                    callhash = md5.new(request["example"][0]).hexdigest()
-                    requestlist.append((callhash, request["example"][0], name,
-                                        request["name"], request["description"]))
-                except KeyError:
-                    pass
-        except TypeError:
-            pass
+        for request in topleveljsonobjects[resource]["requests"]:
+            if "example" in request.keys():
+                n = request["name"]
+                example = request["example"][0].replace("auth_key", "")
+                callhash = md5(request["example"][0].encode('utf8')).hexdigest()
+                requestlist.append((callhash, request["example"][0], name,
+                                   request["name"], request["description"]))
     return requestlist
 
 if __name__ == '__main__':
@@ -228,10 +226,9 @@ if __name__ == '__main__':
         os.makedirs(WORKING)
     # get list of example API calls from API
     if VERBOSE:
-        print "Fetching examples"
+        print("Fetching examples")
     tests = get_example_calls(API_URL)
     if  TESTS:
         print_tests(tests)
     else:
         run_tests(tests)
-
