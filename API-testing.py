@@ -7,10 +7,10 @@ from optparse import OptionParser
 from time import time
 import subprocess
 import json
+from mglib.mglib import obj_from_url, async_rest_api
 
 
-
-API_URL = "http://api.metagenomics.anl.gov/1"
+API_URL = "https://api.mg-rast.org/1"
 
 SKIP = ["48f15d5aae95892edb9bae03988573fa",
         '3bfa44d3dad4e2af12bab2601cfa8138',
@@ -33,21 +33,6 @@ def sanitize(c):
             if c[0] == "'" and clist[j][-1] == "'":
                 clist = clist[:i] + ["".join(clist[i:j+1])[1:-1]] + clist[j+1:]
     return " ".join(clist)
-
-def getmeajsonobject(url):
-    '''places HTTP request for url and parses the returned JSON object'''
-    if VERBOSE:
-        sys.stderr.write("Retrieving %s\n" % url)
-    try:
-        opener = urllib2.urlopen(url)
-    except urllib2.HTTPError, e:
-        print "Error with HTTP request: %d %s\n%s" % (e.code, e.reason, e.read())
-        return None
-    opener.addheaders = [('User-agent', 'API-testing.py')]
-
-    jsonobject = opener.read()
-    jsonstructure = json.loads(jsonobject)
-    return jsonstructure
 
 def print_tests(testlist):
     for test in testlist:
@@ -77,8 +62,14 @@ def check_ok(stem, dir1, blesseddir):
         elif len(f2) == 0:
             return False, "emptyreference"
         elif len(f1) > 0 and len(f2) > 0 and f1[0] == "{" and f2[0] == "{":
-            j1 = json.loads(f1)
-            j2 = json.loads(f2)
+            try:
+                j1 = json.loads(f1)
+            except UnicodeDecodeError:
+                j1 = json.loads(f1.decode('latin-1'))
+            try:
+                j2 = json.loads(f2)
+            except UnicodeDecodeError:
+                j2 = json.loads(f2.decode('latin-1'))
             if "date" in j1.keys():
                 j1["date"] = ""
             if "date" in j2.keys():
@@ -166,12 +157,12 @@ def run_tests(testlist):
 def get_example_calls(base_url):
     topleveljsonobjects = {}
     requestlist = []
-    json_api_calls = getmeajsonobject(base_url)
+    json_api_calls = obj_from_url(base_url)
     listofapiurls = [resources["url"]  for resources in json_api_calls["resources"]]
     for resourceurl in listofapiurls:
         if VERBOSE:
             sys.stderr.write("resourceurl: "+resourceurl+"\n")
-        topleveljsonobjects[resourceurl] = getmeajsonobject(resourceurl)
+        topleveljsonobjects[resourceurl] = obj_from_url(resourceurl)
     if VERBOSE:
         print "listofapiurls: ", listofapiurls
     for resource in listofapiurls:
