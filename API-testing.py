@@ -21,10 +21,9 @@ except ImportError:  # python2
     from urllib import urlencode
     from urllib2 import urlopen, Request, HTTPError
 
-from mglib.mglib import obj_from_url, async_rest_api
 
 
-API_URL = "https://api.mg-rast.org/1"
+API_URL = "http://api.metagenomics.anl.gov/1"
 
 SKIP = ["48f15d5aae95892edb9bae03988573fa",
         '3bfa44d3dad4e2af12bab2601cfa8138',
@@ -51,6 +50,23 @@ def sanitize(c):
             if c[0] == "'" and clist[j][-1] == "'":
                 clist = clist[:i] + ["".join(clist[i:j+1])[1:-1]] + clist[j+1:]
     return " ".join(clist)
+
+def getmeajsonobject(url):
+    '''places HTTP request for url and parses the returned JSON object'''
+    if VERBOSE:
+        sys.stderr.write("Retrieving %s\n" % url)
+    try:
+        opener = urlopen(url)
+    except HTTPError as e:
+        print("Error with HTTP request: %{:d} %{}\n%{}".format(e.code, e.reason, e.read()))
+        return None
+    opener.addheaders = [('User-agent', 'API-testing.py')]
+    try:
+        jsonobject = opener.read().decode("utf8")
+    except UnicodeDecodeError:
+        jsonobject = opener.read().decode("latin-1")
+    jsonstructure = json.loads(jsonobject)
+    return jsonstructure
 
 def print_tests(testlist):
     for test in testlist:
@@ -168,14 +184,14 @@ def run_tests(testlist):
 def get_example_calls(base_url):
     topleveljsonobjects = {}
     requestlist = []
-    json_api_calls = obj_from_url(base_url)
+    json_api_calls = getmeajsonobject(base_url)
     listofapiurls = [resources["url"]  for resources in json_api_calls["resources"]]
     for resourceurl in listofapiurls:
         if VERBOSE:
-            sys.stderr.write("resourceurl: "+resourceurl+"\n")
-        topleveljsonobjects[resourceurl] = obj_from_url(resourceurl)
+            sys.stderr.write(resourceurl+"\n")
+        topleveljsonobjects[resourceurl] = getmeajsonobject(resourceurl)
     if VERBOSE:
-        print "listofapiurls: ", listofapiurls
+        print(listofapiurls)
     for resource in listofapiurls:
         name = resource.split("/")[-1]
         for request in topleveljsonobjects[resource]["requests"]:
@@ -185,6 +201,8 @@ def get_example_calls(base_url):
                 callhash = md5(request["example"][0].encode('utf8')).hexdigest()
                 requestlist.append((callhash, request["example"][0], name,
                                     request["name"], request["description"]))
+    if VERBOSE:
+        print("requestlist", requestlist)
     return requestlist
 
 if __name__ == '__main__':
