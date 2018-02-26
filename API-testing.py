@@ -23,17 +23,17 @@ except ImportError:  # python2
 
 
 
-API_URL = "http://api.metagenomics.anl.gov/1"
+API_URL = "https://api.mg-rast.org/1"
 
-SKIP = ["48f15d5aae95892edb9bae03988573fa",
-        '3bfa44d3dad4e2af12bab2601cfa8138',
-        'a78c50dc4b81f0d02fc0391532cc61f4',
-        'c0a6a295563e01e7c42628cfe81b7431',
-        '19fe36c957ab88a6b5a567d885db445c',
-        '084905a84b75b6860c877a5804453829',
-        '23bd3abcc793f83d87e16913c99ef5ac',
-        '376206640f1592ac9302e30d7cf8fabb',
-        '7017b76a86eee625ec9d954a6149dd12'] # these take too long
+# these take too long
+SKIP = ["48f15d5aae95892edb9bae03988573fa",  '7017b76a86eee625ec9d954a6149dd12', 'bf0461f5474cd711525dcd104452005b',  # annotation/sequence/mgm4447943.3?evalue=10&type=organism&source=SwissProt
+        '3bfa44d3dad4e2af12bab2601cfa8138',  '4978084e1997239e5ea92c873262585e', # annotation/similarity/mgm4447943.3?identity=80&type=function&source=KO
+        'a78c50dc4b81f0d02fc0391532cc61f4',  'be43b392342e558d8285fda7ce6304d3', # download/mgm4447943.3?file=350.1
+        'c0a6a295563e01e7c42628cfe81b7431',  '093f18b3f9fdf63756d185ca3eb4600a', # compute/alphadiversity/mgm4447943.3?level=order
+        '19fe36c957ab88a6b5a567d885db445c',  '376206640f1592ac9302e30d7cf8fabb', # compute/rarefaction/mgm4447943.3?level=order
+        '084905a84b75b6860c877a5804453829',  '4978084e1997239e5ea92c873262585e', # annotation/similarity/mgm4447943.3?identity=80&type=function&source=KO
+        '23bd3abcc793f83d87e16913c99ef5ac',  '093f18b3f9fdf63756d185ca3eb4600a', # compute/alphadiversity/mgm4447943.3?level=order
+        ]
 
 
 
@@ -71,7 +71,23 @@ def getmeajsonobject(url):
 def print_tests(testlist):
     for test in testlist:
         callhash, call, name, name2, description = test
-        print(callhash, call, description)
+        print("\t".join([callhash, call, description]))
+
+def print_code(testlist):
+    print("from subprocess import check_output")
+    for test in testlist:
+        callhash, call, name, name2, description = test
+        if call[0:4] == "curl":
+            print("def test_{}():    #       {}".format(callhash, description))
+            print("    CMD = '''{} 2> {}.err > {}.out'''".format(call, callhash, callhash))
+            print('    o = check_output(CMD, shell=True)')
+        elif call[0:4] == "http":
+            print("def test_{}():    #        {}".format(callhash, description))
+            print("    URI = '''{}'''".format(call))
+            print("    CMD = '''curl '{}' 2> {}.err > {}.out'''".format(call, callhash, callhash))
+            print('    o = check_output("curl {}".format(URI), shell=True)')
+        else:
+            print("CALL", call)
 
 def check_ok(stem, dir1, blesseddir):
     '''Populates a file called WORKING + stem + ".test" with symbols
@@ -214,6 +230,8 @@ if __name__ == '__main__':
                         default="", help="use output format JSON")
     parser.add_argument("-b", "--blesseddir", dest="blesseddir", type=str,
                         default="data", help="Location of stored (good) results")
+    parser.add_argument("-p", "--python", dest="python", action="store_true",
+                        help="output python test code")
     parser.add_argument("-w", "--workdingdir", dest="workingdir", type=str,
                         default=".", help="Working dir--will be filled with output files")
     parser.add_argument("-t", "--test", dest="tests", action="store_true",
@@ -237,5 +255,7 @@ if __name__ == '__main__':
     tests = get_example_calls(API_URL)
     if  TESTS:
         print_tests(tests)
+    elif opts.python:
+        print_code(tests)
     else:
         run_tests(tests)
