@@ -1,5 +1,6 @@
 
-
+test_json:
+	py.test --json=report.json tests/test_byhand.py
 
 test:
 	py.test tests/test_byhand.py
