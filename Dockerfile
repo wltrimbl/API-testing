@@ -2,17 +2,10 @@
 
 FROM alpine:3.7
 
-RUN apk update && apk add curl python
-RUN apk add make pytest file
-
-#FROM ubuntu 14.04
-#RUN apt-get update && apt-get install -y \
-#  python \
-#  curl 
+RUN apk update && apk add make curl python pytest file py-pip
+RUN pip install pytest-json
 
 COPY . /root/
 
 WORKDIR /root
-
-#CMD ["/root/API-testing.py", "--fast", "-w /root/test", "-b /root/data", "--jsonfile /tmp_host/api_test.json"]
 
