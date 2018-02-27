@@ -1,8 +1,9 @@
 # MG-RAST API-testing
 
-FROM alpine:3.4
+FROM alpine:3.7
 
 RUN apk update && apk add curl python
+RUN apk add make pytest file
 
 #FROM ubuntu 14.04
 #RUN apt-get update && apt-get install -y \
