@@ -1,4 +1,5 @@
 import pytest 
+import os
 from subprocess import check_output
 
 #  This test was noted failing for some backend API servers but not others
@@ -7,6 +8,8 @@ from subprocess import check_output
 
 def read_api_list(filename):
     server_list = []
+    if not os.path.isfile(filename):
+        return(["http://api.mg-rast.org", "https://api.mg-rast.org"])
     for l in open(filename).readlines():
         server_list.append(l.strip())
     return(server_list)

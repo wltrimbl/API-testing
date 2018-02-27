@@ -9,6 +9,8 @@ APIS = ["http://api.mg-rast.org", "https://api.mg-rast.org", "http://api.metagen
 
 def read_api_list(filename):
     server_list = []
+    if not os.path.isfile(filename):
+        return(["http://api.mg-rast.org", "https://api.mg-rast.org"]) for l in open(filename).readlines():
     for l in open(filename).readlines():
         server_list.append(l.strip())
     return(server_list)
