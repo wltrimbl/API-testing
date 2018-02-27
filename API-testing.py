@@ -2,21 +2,38 @@
 '''This script retrieves example API invokations form MG-RAST and compares new results
 against stored return values from the example API calls. '''
 
-import urllib2, json, sys, md5, os
-from optparse import OptionParser
+from __future__ import print_function
+import json
+import sys
+import os
+import codecs
+from hashlib import md5
+import argparse
 from time import time
 import subprocess
-import json
+
+try:  # python3
+    from urllib.parse import urlparse, urlencode, parse_qs
+    from urllib.request import urlopen, Request
+    from urllib.error import HTTPError
+except ImportError:  # python2
+    from urlparse import urlparse, parse_qs
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError
 
 
 
-API_URL = "http://api.metagenomics.anl.gov/1"
+API_URL = "https://api.mg-rast.org/1"
 
-SKIP = ["48f15d5aae95892edb9bae03988573fa",
-        '3bfa44d3dad4e2af12bab2601cfa8138',
-        'a78c50dc4b81f0d02fc0391532cc61f4',
-        'c0a6a295563e01e7c42628cfe81b7431',
-        '19fe36c957ab88a6b5a567d885db445c'] # these take too long
+# these take too long
+SKIP = ["48f15d5aae95892edb9bae03988573fa",  '7017b76a86eee625ec9d954a6149dd12', 'bf0461f5474cd711525dcd104452005b',  # annotation/sequence/mgm4447943.3?evalue=10&type=organism&source=SwissProt
+        '3bfa44d3dad4e2af12bab2601cfa8138',  '4978084e1997239e5ea92c873262585e', # annotation/similarity/mgm4447943.3?identity=80&type=function&source=KO
+        'a78c50dc4b81f0d02fc0391532cc61f4',  'be43b392342e558d8285fda7ce6304d3', # download/mgm4447943.3?file=350.1
+        'c0a6a295563e01e7c42628cfe81b7431',  '093f18b3f9fdf63756d185ca3eb4600a', # compute/alphadiversity/mgm4447943.3?level=order
+        '19fe36c957ab88a6b5a567d885db445c',  '376206640f1592ac9302e30d7cf8fabb', # compute/rarefaction/mgm4447943.3?level=order
+        '084905a84b75b6860c877a5804453829',  '4978084e1997239e5ea92c873262585e', # annotation/similarity/mgm4447943.3?identity=80&type=function&source=KO
+        '23bd3abcc793f83d87e16913c99ef5ac',  '093f18b3f9fdf63756d185ca3eb4600a', # compute/alphadiversity/mgm4447943.3?level=order
+        ]
 
 
 
@@ -39,36 +56,52 @@ def getmeajsonobject(url):
     if VERBOSE:
         sys.stderr.write("Retrieving %s\n" % url)
     try:
-        opener = urllib2.urlopen(url)
-    except urllib2.HTTPError, e:
-        print "Error with HTTP request: %d %s\n%s" % (e.code, e.reason, e.read())
+        opener = urlopen(url)
+    except HTTPError as e:
+        print("Error with HTTP request: %{:d} %{}\n%{}".format(e.code, e.reason, e.read()))
         return None
     opener.addheaders = [('User-agent', 'API-testing.py')]
-
-    jsonobject = opener.read()
+    try:
+        jsonobject = opener.read().decode("utf8")
+    except UnicodeDecodeError:
+        jsonobject = opener.read().decode("latin-1")
     jsonstructure = json.loads(jsonobject)
     return jsonstructure
 
 def print_tests(testlist):
     for test in testlist:
         callhash, call, name, name2, description = test
-        print callhash, call, description
+        print("\t".join([callhash, call, description]))
+
+def print_code(testlist):
+    print("from subprocess import check_output")
+    for test in testlist:
+        callhash, call, name, name2, description = test
+        if call[0:4] == "curl":
+            print("def test_{}():    #       {}".format(callhash, description))
+            print("    CMD = '''{} 2> {}.err > {}.out'''".format(call, callhash, callhash))
+            print('    o = check_output(CMD, shell=True)')
+        elif call[0:4] == "http":
+            print("def test_{}():    #        {}".format(callhash, description))
+            print("    URI = '''{}'''".format(call))
+            print("    CMD = '''curl '{}' 2> {}.err > {}.out'''".format(call, callhash, callhash))
+            print('    o = check_output("curl {}".format(URI), shell=True)')
+        else:
+            print("CALL", call)
 
 def check_ok(stem, dir1, blesseddir):
     '''Populates a file called WORKING + stem + ".test" with symbols
     indicating which tests for similarity of output passed'''
     try:
-        f1 = open(dir1+"/"+stem+".out").read()
+        f1 = codecs.open(dir1+"/"+stem+".out", encoding="utf8").read()
     except Exception as e:
         return False, "Exception: "+str(e)
-        
     try:
-        f2 = open(blesseddir+"/"+stem+".out").read()
+        f2 = codecs.open(blesseddir+"/"+stem+".out", encoding="utf8").read()
     except Exception as e:
         return False, "Exception: "+str(e)
-        
-    md5A = md5.new(f1).hexdigest()
-    md5B = md5.new(f2).hexdigest()
+    md5A = md5(f1.encode('utf8')).hexdigest()
+    md5B = md5(f2.encode('utf8')).hexdigest()
     if len(f1) == 0 and len(f2) == 0:
         return True, "matchempty"
     if md5A != md5B:
@@ -77,8 +110,14 @@ def check_ok(stem, dir1, blesseddir):
         elif len(f2) == 0:
             return False, "emptyreference"
         elif len(f1) > 0 and len(f2) > 0 and f1[0] == "{" and f2[0] == "{":
-            j1 = json.loads(f1)
-            j2 = json.loads(f2)
+            try:            #   in case API returns invalid unicode!
+                j1 = json.loads(f1)
+            except UnicodeDecodeError:
+                j1 = json.loads(f1.decode('latin-1'))
+            try:
+                j2 = json.loads(f2)
+            except UnicodeDecodeError:
+                j2 = json.loads(f2.decode('latin-1'))
             if "date" in j1.keys():
                 j1["date"] = ""
             if "date" in j2.keys():
@@ -103,14 +142,12 @@ def check_ok(stem, dir1, blesseddir):
 
 def run_tests(testlist):
     '''run tests for list of URIs in testlist'''
-    
+
     result_hash = {}
     if JSON_FILE:
-        result_hash["tests"]={}
+        result_hash["tests"] = {}
         result_hash["epoch_utc_start"] = time()
-        
     for test in testlist:
-        
         if test[0] not in SKIP or not FAST:
             callhash, call, name, name2, description = test
             fncall = WORKING + "/" + callhash + ".call"
@@ -127,27 +164,26 @@ def run_tests(testlist):
             else:
                 command = "curl {} -s -D {}.err".format(call, fnerr)
             if VERBOSE:
-                print "trying", callhash, command
+                print("trying", callhash, command)
             start = time()
             subprocess.call(str(command).split(), stdout=fout, shell=shell)
             elapsed = time() - start
             fout.close()
             ok, mesg = check_ok(callhash, WORKING, BLESSED)
             if JSON_FILE:
-                result_hash["tests"][callhash] ={}
+                result_hash["tests"][callhash] = {}
                 result_hash["tests"][callhash]["status"] = ok
                 result_hash["tests"][callhash]["call"] = call
                 result_hash["tests"][callhash]["mesg"] = mesg
                 result_hash["tests"][callhash]["time"] = elapsed
-            else: 
+            else:
                 if ok:
                     os.remove(fnout)
                 else:
-                    print "TESTFAIL", callhash, call, mesg
-                
+                    print("TESTFAIL", callhash, call, mesg)
             ftest = open(WORKING+"/"+callhash + ".test", "w")
             if VERBOSE:
-                print "result: "+repr(ok)+mesg
+                print("result: "+repr(ok)+mesg)
             ftest.write(repr(ok)+mesg+"\n")
             ftest.close()
             ftime = open(WORKING+"/"+callhash + ".time", "w")
@@ -155,9 +191,7 @@ def run_tests(testlist):
             ftime.close()
         else:
             if VERBOSE:
-                print "skipping", test[0]
-                
-                
+                print("skipping", test[0])
     if JSON_FILE:
         result_hash["epoch_utc_end"] = time()
         with open(JSON_FILE, 'w') as outfile:
@@ -170,43 +204,42 @@ def get_example_calls(base_url):
     listofapiurls = [resources["url"]  for resources in json_api_calls["resources"]]
     for resourceurl in listofapiurls:
         if VERBOSE:
-            sys.stderr.write("resourceurl: "+resourceurl+"\n")
+            sys.stderr.write(resourceurl+"\n")
         topleveljsonobjects[resourceurl] = getmeajsonobject(resourceurl)
     if VERBOSE:
-        print "listofapiurls: ", listofapiurls
+        print(listofapiurls)
     for resource in listofapiurls:
         name = resource.split("/")[-1]
-        try:
-            for request in topleveljsonobjects[resource]["requests"]:
-                try:
-                    n = request["name"]
-                    example = request["example"][0].replace("auth_key", "")
-                    callhash = md5.new(request["example"][0]).hexdigest()
-                    requestlist.append((callhash, request["example"][0], name,
-                                        request["name"], request["description"]))
-                except KeyError:
-                    pass
-        except TypeError:
-            pass
+        for request in topleveljsonobjects[resource]["requests"]:
+            if "example" in request.keys():
+                n = request["name"]
+                example = request["example"][0].replace("auth_key", "")
+                callhash = md5(request["example"][0].encode('utf8')).hexdigest()
+                requestlist.append((callhash, request["example"][0], name,
+                                    request["name"], request["description"]))
+    if VERBOSE:
+        print("requestlist", requestlist)
     return requestlist
 
 if __name__ == '__main__':
     usage = "usage: %prog \n  Tests MG-RAST API calls with example invokations in API"
-    parser = OptionParser(usage)
-    parser.add_option("-v", "--verbose", dest="verbose", action="store_true",
-                      default=False, help="Verbose")
-    parser.add_option("-j", "--jsonfile", dest="json_file", type="str",
-                     default="", help="use output format JSON")
-    parser.add_option("-b", "--blesseddir", dest="blesseddir", type="str",
-                      default="data", help="Location of stored (good) results")
-    parser.add_option("-w", "--workdingdir", dest="workingdir", type="str",
-                      default=".", help="Working dir--will be filled with output files")
-    parser.add_option("-t", "--test", dest="tests", action="store_true",
-                      default=False, help="don't do it, just print tests")
-    parser.add_option("-f", "--fast", dest="fast", action="store_true",
-                      default=False, help="skip slow tests")
+    parser = argparse.ArgumentParser(usage)
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true",
+                        default=False, help="Verbose")
+    parser.add_argument("-j", "--jsonfile", dest="json_file", type=str,
+                        default="", help="use output format JSON")
+    parser.add_argument("-b", "--blesseddir", dest="blesseddir", type=str,
+                        default="data", help="Location of stored (good) results")
+    parser.add_argument("-p", "--python", dest="python", action="store_true",
+                        help="output python test code")
+    parser.add_argument("-w", "--workdingdir", dest="workingdir", type=str,
+                        default=".", help="Working dir--will be filled with output files")
+    parser.add_argument("-t", "--test", dest="tests", action="store_true",
+                        default=False, help="don't do it, just print tests")
+    parser.add_argument("-f", "--fast", dest="fast", action="store_true",
+                        default=False, help="skip slow tests")
 
-    (opts, args) = parser.parse_args()
+    opts = parser.parse_args()
     VERBOSE = opts.verbose
     BLESSED = opts.blesseddir
     WORKING = opts.workingdir
@@ -218,10 +251,11 @@ if __name__ == '__main__':
         os.makedirs(WORKING)
     # get list of example API calls from API
     if VERBOSE:
-        print "Fetching examples"
+        print("Fetching examples")
     tests = get_example_calls(API_URL)
     if  TESTS:
         print_tests(tests)
+    elif opts.python:
+        print_code(tests)
     else:
         run_tests(tests)
-

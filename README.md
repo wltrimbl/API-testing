@@ -2,7 +2,7 @@
 test script and data for MG-RAST API tests
 
 This script harvests example API calls from the MG-RAST
-API at http://api.metagenomics.anl.gov/1, 
+API at http://api.mg-rast.org/1, 
 invokes them with curl, and compares the outputs to
 previously saved outputs in the data directory. 
 
