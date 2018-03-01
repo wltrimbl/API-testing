@@ -2,7 +2,7 @@
 
 FROM alpine:3.7
 
-RUN apk update && apk add make curl python pytest file py-pip
+RUN apk update && apk add make bash curl python pytest file py-pip
 RUN pip install pytest-json
 
 COPY . /root/
