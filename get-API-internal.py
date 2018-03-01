@@ -11,14 +11,6 @@ if len(sys.argv) == 1:
     sys.exit(1)
 
 etcdhost = sys.argv[1]
-hostregex = re.match(r'^(.*)\{(\d+)\.\.(\d+)\}(.*)$', etcdhost)
-if hostregex:
-    prefix = hostregex.group(1)
-    first  = int(hostregex.group(2))
-    last   = int(hostregex.group(3))
-    suffix = hostregex.group(4)
-    etcdhost = "%s%d%s"%(prefix, random.randint(first, last), suffix)
-    print etcdhost
 
 try:
     info = json.loads(check_output(["curl", "-s", "http://%s:2379/v2/keys/services/api-server/api/"%(etcdhost)]))
