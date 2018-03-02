@@ -1,11 +1,13 @@
 # MG-RAST API-testing
 
-FROM alpine:3.7
+FROM debian:jessie
 
-RUN apk update && apk add make bash curl python pytest file py-pip
-RUN pip install pytest-json
+RUN apt-get update && apt-get install -y make curl python python-pip
+
+RUN pip install --upgrade pip
+
+RUN pip install pytest pytest-json
 
 COPY . /root/
 
 WORKDIR /root
-
