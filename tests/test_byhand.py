@@ -30,7 +30,7 @@ def test_utf8_metagenome_export(API_URL):
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_utf8_metadata_export(API_URL):
-    URL = API_URL + "/metadata/export/mgp128"
+    URL = API_URL + "/metadata/export/mgp24"
     a = check_output('''curl -s '{}' | file -'''.format(URL), shell=True)
     assert b"UTF-8" in a
 
