@@ -121,4 +121,8 @@ def test_errs_download_history(API_URL):
     print(URL)
     a = check_output('''curl -s '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
-
+@pytest.mark.parametrize("API_URL", APIS)
+def test_err_post_parsing(API_URL):
+    CURLCMD = '''curl -d '{"data":"000821a2e2f63df1a3873e4b280002a8","format":"fasta","sequence":0,"source":"InterPro"}' ''' + API_URL + '''/m5nr/md5'''
+    a = check_output(CURLCMD, shell=True)
+    assert b"ARRAY ref" not in a
