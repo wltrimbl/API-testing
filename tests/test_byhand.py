@@ -122,7 +122,19 @@ def test_errs_download_history(API_URL):
     a = check_output('''curl -s '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 @pytest.mark.parametrize("API_URL", APIS)
-def test_err_post_parsing(API_URL):
+def test_err_post_parsing_err(API_URL):
     CURLCMD = '''curl -d '{"data":"000821a2e2f63df1a3873e4b280002a8","format":"fasta","sequence":0,"source":"InterPro"}' ''' + API_URL + '''/m5nr/md5'''
     a = check_output(CURLCMD, shell=True)
     assert b"ARRAY ref" not in a
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_err_post_parsing_correct(API_URL):
+    CURLCMD = '''curl -d '{"data":["000821a2e2f63df1a3873e4b280002a8"],"format":"fasta","sequence":0,"source":"InterPro"}' ''' + API_URL + '''/m5nr/md5'''
+    a = check_output(CURLCMD, shell=True)
+    assert b"ARRAY ref" not in a
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_err_parse_md5_blast(API_URL):
+    CURLCMD = "curl "  + API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=15bf1950bd9867099e72ea6516e3d602&rna=0" 
+    a = check_output(CURLCMD, shell=True)
+    assert b"ERROR" not in a
