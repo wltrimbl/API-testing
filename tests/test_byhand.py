@@ -62,13 +62,6 @@ def test_blast_result_http(API_URL):
     assert b"ERROR" not in a
     assert b"alignment" in a
 
-@pytest.mark.parametrize("API_URL", APIS)
-def test_blast_result_https(API_URL):
-    URL = API_URL + "/compute/blast/mgm4447943.3?md5=0001c08aa276d154b7696f9758839786"
-    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
-    assert b"ERROR" not in a
-    assert b"alignment" in a
-
 #def test_post1(API_URL):
 #    CMD = '''curl -sS -X POST -d '{"source":"KO","type":"function","md5s":["000821a2e2f63df1a3873e4b280002a8","15bf1950bd9867099e72ea6516e3d602"]}' "https://api.mg-rast.org/annotation/sequence/mgm4447943.3"'''     # EMPTY RETURN DATA
 
@@ -134,7 +127,24 @@ def test_err_post_parsing_correct(API_URL):
     assert b"ARRAY ref" not in a
 
 @pytest.mark.parametrize("API_URL", APIS)
+def test_err_post_parsing_correct2(API_URL):
+    CURLCMD = '''curl -X POST -sS -d '{"data":["000821a2e2f63df1a3873e4b280002a8"],"format":"fasta","sequence":0,"source":"InterPro"}' ''' + API_URL + '''/m5nr/md5'''
+    a = check_output(CURLCMD, shell=True)
+    assert b"ARRAY ref" not in a
+
+@pytest.mark.parametrize("API_URL", APIS)
 def test_err_parse_md5_blast(API_URL):
     CURLCMD = "curl -sS "  + API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=15bf1950bd9867099e72ea6516e3d602&rna=0" 
     a = check_output(CURLCMD, shell=True)
     assert b"ERROR" not in a
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_mixs_schema(API_URL):
+    CURLCMD = "curl -sS " + API_URL + "/mixs/schema"
+    a = check_output(CURLCMD, shell=True)
+    assert b"ERROR" not in a
+
+def test_mg_search():
+    CURLCMD='''curl -F "offset=5" -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "http://api-ui.mg-rast.org/search"'''
+    a = check_output(CURLCMD, shell=True)
+
