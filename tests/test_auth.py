@@ -11,6 +11,18 @@ def test_upload0():
     assert "authentication fail" in o
     assert "ERROR" in o
 
+def test_upload_auth0():
+    if 'MGRKEY' in os.environ:
+        MGRKEY = os.environ['MGRKEY']
+    else:
+        assert False, "This test does not work without MGRKEY"
+    CMD = '''curl -X POST -H "auth: {}" -F "upload=@data/metadata.simple.xlsx" "https://api.mg-rast.org/inbox"'''.format(MGRKEY)
+    print(CMD)
+    o = check_output(CMD, shell=True)
+    print(o)
+    assert "authentication fail" not in o
+    assert "ERROR" not in o
+
 def test_upload1():
     if 'MGRKEY' in os.environ:
         MGRKEY = os.environ['MGRKEY']
