@@ -134,7 +134,7 @@ def test_err_post_parsing_correct2(API_URL):
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_err_parse_md5_blast(API_URL):
-    CURLCMD = "curl -sS "  + API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=15bf1950bd9867099e72ea6516e3d602&rna=0" 
+    CURLCMD = "curl -sS "  + API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=0001c2703270cc7aec519107b8215b11&rna=0" 
     a = check_output(CURLCMD, shell=True)
     assert b"ERROR" not in a
 
