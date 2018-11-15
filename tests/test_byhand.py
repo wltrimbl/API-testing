@@ -81,37 +81,31 @@ def test_errs_matrix_function(API_URL):
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_profile(API_URL):
     URL = API_URL + "/profile/mgm4447943.3?source=RefSeq&format=biom"
-    print(URL)
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_matrix_organism(API_URL):
     URL = API_URL + "/matrix/organism?id=mgm4447943.3&id=mgm4447192.3&id=mgm4447102.3&group_level=family&source=RefSeq&evalue=15"
-    print(URL)
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_library(API_URL):
     URL = API_URL + "/library/mgl52924?verbosity=full"
-    print(URL)
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_metadata(API_URL):
     URL = API_URL + "/metadata/ontology?name=biome&version=2017-04-15"
-    print(URL)
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_darkmatter(API_URL):
     URL = API_URL + "/darkmatter/mgm4447943.3?"
-    print(URL)
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_download_history(API_URL):
     URL = API_URL + "/download/history/mgm4447943.3"
-    print(URL)
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 @pytest.mark.parametrize("API_URL", APIS)
@@ -134,14 +128,14 @@ def test_err_post_parsing_correct2(API_URL):
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_err_parse_md5_blast(API_URL):
-    CURLCMD = "curl -sS "  + API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=0001c2703270cc7aec519107b8215b11&rna=0" 
-    a = check_output(CURLCMD, shell=True)
+    URL = API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=0001c2703270cc7aec519107b8215b11&rna=0"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_mixs_schema(API_URL):
-    CURLCMD = "curl -sS " + API_URL + "/mixs/schema"
-    a = check_output(CURLCMD, shell=True)
+    URL = API_URL + "/mixs/schema"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 
 def test_mg_search():
