@@ -42,21 +42,27 @@ def test_download_partial(API_URL):
     assert b"GF8803K01A00MJ" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_annotation_similarity(API_URL):
+def test_annotation_similarity_GET(API_URL):
     URL = API_URL + "/annotation/similarity/mgm4447943.3?identity=80&type=function&source=KO"
     a = check_output('''curl -sS '{}' | head -n 10 '''.format(URL), shell=True)
     assert b"ERROR" not in a
     assert b"\t" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_annotation_sequence(API_URL):
+def test_annotation_similarity_POST(API_URL):
+    a = check_output('''curl -sS -d '{"md5s":["000a8d74068603c9e8674bff9970f367","0001c08aa276d154b7696f9758839786"]}' '{}/annotation/similarity/mgm4447943.3' '''.format(API_URL), shell=True)
+    assert b"ERROR" not in a
+    assert b"\t" in a
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_annotation_sequence_GET(API_URL):
     URL = API_URL + "/annotation/sequence/mgm4447943.3?evalue=10&type=organism&source=SwissProt"
     a = check_output('''curl -sS '{}' | head -n 10 '''.format(URL), shell=True)
     assert b"ERROR" not in a
     assert b"\t" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_blast_result_http(API_URL):
+def test_blast_result(API_URL):
     URL = API_URL + "/compute/blast/mgm4447943.3?md5=0001c08aa276d154b7696f9758839786"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
@@ -66,7 +72,7 @@ def test_blast_result_http(API_URL):
 #    CMD = '''curl -sS -X POST -d '{"source":"KO","type":"function","md5s":["000821a2e2f63df1a3873e4b280002a8","15bf1950bd9867099e72ea6516e3d602"]}' "https://api.mg-rast.org/annotation/sequence/mgm4447943.3"'''     # EMPTY RETURN DATA
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_post2(API_URL):
+def test_annotation_sequence_post(API_URL):
     URL = API_URL + "/annotation/sequence/mgm4447943.3"
     CMD = '''curl -sS -X POST -d '{"source":"SwissProt","type":"organism","md5s":["000821a2e2f63df1a3873e4b280002a8","15bf1950bd9867099e72ea6516e3d602"]}' "''' + API_URL + '''"'''
     a = check_output(CMD, shell=True)
