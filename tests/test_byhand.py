@@ -49,6 +49,12 @@ def test_annotation_similarity_GET(API_URL):
     assert b"\t" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
+def test_annotation_similarity_POST(API_URL):
+    a = check_output('''curl -sS -d '{"md5s":["000a8d74068603c9e8674bff9970f367","0001c08aa276d154b7696f9758839786"]}' '{}/annotation/similarity/mgm4447943.3' '''.format(API_URL), shell=True)
+    assert b"ERROR" not in a
+    assert b"\t" in a
+
+@pytest.mark.parametrize("API_URL", APIS)
 def test_annotation_sequence_GET(API_URL):
     URL = API_URL + "/annotation/sequence/mgm4447943.3?evalue=10&type=organism&source=SwissProt"
     a = check_output('''curl -sS '{}' | head -n 10 '''.format(URL), shell=True)
@@ -136,7 +142,7 @@ def test_err_post_parsing_correct2(API_URL):
 def test_err_parse_md5_blast(API_URL):
     CURLCMD = "curl -sS "  + API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=15bf1950bd9867099e72ea6516e3d602&rna=0" 
     a = check_output(CURLCMD, shell=True)
-    assert b"ERROR" not in a
+    assert b"ERROR" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_mixs_schema(API_URL):
