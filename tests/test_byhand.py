@@ -23,6 +23,13 @@ def test_utf8_project(API_URL):
     assert b"UTF-8" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
+def test_metagenome_export_noerror(API_URL):
+    URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
+    a = check_output('''curl -sS '{}' | file -'''.format(URL), shell=True)
+    print(a)
+    assert b"ERROR" not in a
+
+@pytest.mark.parametrize("API_URL", APIS)
 def test_utf8_metagenome_export(API_URL):
     URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
     a = check_output('''curl -sS '{}' | file -'''.format(URL), shell=True)
@@ -50,7 +57,7 @@ def test_annotation_similarity_GET(API_URL):
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_annotation_similarity_POST(API_URL):
-    a = check_output('''curl -sS -d '{"md5s":["000a8d74068603c9e8674bff9970f367","0001c08aa276d154b7696f9758839786"]}' '{}/annotation/similarity/mgm4447943.3' '''.format(API_URL), shell=True)
+    a = check_output('''curl -sS -d '{"md5s":["000a8d74068603c9e8674bff9970f367","0001c08aa276d154b7696f9758839786"]}' ''' + API_URL + '''/annotation/similarity/mgm4447943.3 ''', shell=True)
     assert b"ERROR" not in a
     assert b"\t" in a
 
