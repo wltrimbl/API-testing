@@ -20,28 +20,28 @@ def test_apix3():
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
 def test_apix_darkmatter_id():
-    CALL = '''curl 'http://api-ui.mg-rast.org/darkmatter/mgm4447943.3?id=mgm4447943.3' '''
+    CALL = '''curl 'http://api-ui.mg-rast.org/darkmatter/mgm4447943.3?id=mgm4447943.3' | head '''
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
 def test_apix_download_id_350():
-    CALL = '''curl 'http://api-ui.mg-rast.org/download/mgm4447943.3?id=mgm4447943.3&file=350.1&link=0' '''
+    CALL = '''curl 'http://api-ui.mg-rast.org/download/mgm4447943.3?id=mgm4447943.3&file=350.1&link=0' | head '''
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
 
 def test_apix_download_history():
-    CALL = '''curl 'http://api-ui.mg-rast.org/download/history/mgm4447943.3?id=mgm4447943.3&delete=0&force=0' '''
+    CALL = '''curl 'http://api-ui.mg-rast.org/download/history/mgm4447943.3?id=mgm4447943.3&delete=0&force=0' | head '''
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
 def test_apix_download():
-    CALL = '''curl 'http://api-ui.mg-rast.org/download/mgm4447943.3?id=mgm4447943.3&stage=650' '''
+    CALL = '''curl 'http://api-ui.mg-rast.org/download/mgm4447943.3?id=mgm4447943.3&stage=650' | head '''
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
 def test_apix_m5nr_accession():
-    CALL = '''curl 'http://api-ui.mg-rast.org/m5nr/accession/YP_003268079.1?id=YP_003268079.1' '''
+    CALL = '''curl 'http://api-ui.mg-rast.org/m5nr/accession/YP_003268079.1?id=YP_003268079.1' | head '''
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
 def test_apix_m5nr_md5():
-    CALL = '''curl 'http://api-ui.mg-rast.org/m5nr/md5/000821a2e2f63df1a3873e4b280002a8?id=000821a2e2f63df1a3873e4b280002a8&format=fasta&sequence=0&source=RefSeq' '''
+    CALL = '''curl 'http://api-ui.mg-rast.org/m5nr/md5/000821a2e2f63df1a3873e4b280002a8?id=000821a2e2f63df1a3873e4b280002a8&format=fasta&sequence=0&source=RefSeq' | head '''
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
 def test_apix_m5nr_function():
