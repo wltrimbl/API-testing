@@ -1,6 +1,11 @@
 import os
 from subprocess import check_output
 import pytest
+try:
+    import urllib2 #python2
+except:
+    import urllib.request as urllib2 #python3
+import sys
 
 # These tests should be quick
 
@@ -155,3 +160,20 @@ def test_mg_search():
     CURLCMD='''curl -F "offset=5" -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "http://api-ui.mg-rast.org/search"'''
     a = check_output(CURLCMD, shell=True)
 
+# Test that server certificats are ok
+
+def test_cert_shock():
+    req = urllib2.Request("https://shock.mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    urllib2.urlopen(req)
+
+def test_cert_awe():
+    req = urllib2.Request("https://awe.mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    urllib2.urlopen(req)
+
+def test_cert_mgrast():
+    req = urllib2.Request("https://mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    urllib2.urlopen(req)
+
+def test_cert_api():
+    req = urllib2.Request("https://api.mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    urllib2.urlopen(req)
