@@ -1,11 +1,12 @@
 import os
 from subprocess import check_output
 import pytest
+import json
+
 try:
     import urllib2 #python2
 except:
     import urllib.request as urllib2 #python3
-import sys
 
 # These tests should be quick
 
@@ -22,29 +23,52 @@ def read_api_list(filename):
 APIS = read_api_list("API.server.list")
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_utf8_project(API_URL):
+def test_project_utf8(API_URL):
     URL = API_URL + '/project/mgp128?verbosity=full'
-    a = check_output('''curl -sS '{}' |file -'''.format(URL), shell=True)
-    assert b"UTF-8" in a
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")   # fails if Latin-1
+    assert "ERROR" not in b
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_metagenome_export_noerror(API_URL):
-    URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
-    a = check_output('''curl -sS '{}' | file -'''.format(URL), shell=True)
-    print(a)
+def test_project_noerror(API_URL):
+    URL = API_URL + '/project/mgp128?verbosity=full'
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_utf8_metagenome_export(API_URL):
-    URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
-    a = check_output('''curl -sS '{}' | file -'''.format(URL), shell=True)
-    assert b"UTF-8" in a
+def test_project_validjson(API_URL):
+    URL = API_URL + '/project/mgp128?verbosity=full'
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")   # fails if Latin-1
+    c = json.loads(b)  # fails if JSON corrupt
+    assert "ERROR" not in b
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_utf8_metadata_export(API_URL):
+def test_metagenome_noerror(API_URL):
+    URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")   # fails if Latin-1
+    c = json.loads(b)  # fails if JSON corrupt
+    assert b"ERROR" not in a
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_metagenome_utf8(API_URL):
+    URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")   # fails if Latin-1
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_metagenome_validjson(API_URL):
+    URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")   # fails if Latin-1
+    c = json.loads(b) 
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_metadata_export_utf8(API_URL):
     URL = API_URL + "/metadata/export/mgp128"
-    a = check_output('''curl -sS '{}' | file -'''.format(URL), shell=True)
-    assert b"UTF-8" in a
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")   # fails if Latin-1
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_download_partial(API_URL):
@@ -86,7 +110,7 @@ def test_blast_result(API_URL):
 @pytest.mark.parametrize("API_URL", APIS)
 def test_annotation_sequence_post(API_URL):
     URL = API_URL + "/annotation/sequence/mgm4447943.3"
-    CMD = '''curl -sS -X POST -d '{"source":"SwissProt","type":"organism","md5s":["000821a2e2f63df1a3873e4b280002a8","15bf1950bd9867099e72ea6516e3d602"]}' "''' + API_URL + '''"'''
+    CMD = '''curl -sS -X POST -d '{"source":"SwissProt","type":"organism","md5s":["000821a2e2f63df1a3873e4b280002a8","15bf1950bd9867099e72ea6516e3d602"]}' "''' + URL + '''"'''
     a = check_output(CMD, shell=True)
     assert b"ERROR" not in a
 

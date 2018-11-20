@@ -1,6 +1,4 @@
-import os
 from subprocess import check_output
-import pytest
 
 # subset of ~20 example invokations from the API-explorer page  (all GET)
 # http://www.mg-rast.org/mgmain.html?mgpage=api 
