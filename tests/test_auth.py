@@ -8,8 +8,8 @@ def test_upload0():
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
-    assert "authentication fail" in o
-    assert "ERROR" in o
+    assert b"authentication fail" in o
+    assert b"ERROR" in o
 
 def test_upload_auth0():
     if 'MGRKEY' in os.environ:
@@ -20,8 +20,8 @@ def test_upload_auth0():
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
-    assert "authentication fail" not in o
-    assert "ERROR" not in o
+    assert b"authentication fail" not in o
+    assert b"ERROR" not in o
 
 def test_upload1():
     if 'MGRKEY' in os.environ:
@@ -42,7 +42,7 @@ def test_upload_and_validate():
     print(CMD)
     o = check_output(CMD, shell=True)
     j = json.loads(o)    
-    ID = re.findall("\((.*)\)", j["status"])[0]
+    ID = re.findall(r"\((.*)\)", j["status"])[0]
     print(ID)
     assert "metadata.simple.xlsx" in j["status"]
     CMD = '''curl -X GET -H "Authorization: mgrast {}" "https://api.mg-rast.org/inbox/validate/{}"'''.format(MGRKEY, ID)
@@ -61,7 +61,7 @@ def test_fastq_upload_and_validate():
     print(CMD)
     o = check_output(CMD, shell=True)
     j = json.loads(o)    
-    ID = re.findall("\((.*)\)", j["status"])[0]
+    ID = re.findall(r"\((.*)\)", j["status"])[0]
     print(ID)
     assert "Sample.DM.fastq" in j["status"]
     CMD = '''curl -X GET -H "Authorization: mgrast {}" "https://api.mg-rast.org/inbox/stats/{}"'''.format(MGRKEY, ID)
