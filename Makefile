@@ -10,3 +10,6 @@ testall:
 
 test_api:
 	./API-testing.py -p > tests/test_api.py
+
+utf8:
+	py.test -k utf8

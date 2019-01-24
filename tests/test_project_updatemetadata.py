@@ -18,6 +18,7 @@ def get_proj_metadata(proj, field):
 #    print(TESTURL, TESTDATA, TESTHEADERS)
     a = requests.get(TESTURL, headers=TESTHEADERS, params=TESTDATA)
     aa = json.loads(a.content.decode("utf-8"))
+    assert "ERROR" not in a.content.decode("utf-8")
     return(field, aa["metadata"][field])
 
 def set_proj_metadata(proj, terms):
