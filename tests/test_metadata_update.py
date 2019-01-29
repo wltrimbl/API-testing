@@ -63,7 +63,7 @@ def test_metadata_update_xls_nounicode():
     FIXTURE = DATADIR+"/FIXTURE-mgp28785-nounicode2.xlsx"
     PROJECT = "mgp28785"
     FIELD = "PI_organization_address"
-    h = metadata_update(PROJECT, FIXTURE) 
+    h = metadata_update(PROJECT, FIXTURE)
     assert b"ERROR" not in h
     f, v = get_proj_metadata(PROJECT, FIELD)
     print(f, v)

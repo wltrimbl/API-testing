@@ -47,22 +47,24 @@ def test_project_validjson(API_URL):
 def test_metagenome_noerror(API_URL):
     URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    assert b"ERROR" not in a
     b = a.decode("utf-8")   # fails if Latin-1
     c = json.loads(b)  # fails if JSON corrupt
-    assert b"ERROR" not in a
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metagenome_utf8(API_URL):
     URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
+    assert "ERROR" not in b
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metagenome_validjson(API_URL):
     URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
-    c = json.loads(b) 
+    c = json.loads(b)
+    assert len(c["name"])  > 4
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metadata_export_utf8(API_URL):
@@ -180,24 +182,35 @@ def test_mixs_schema(API_URL):
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 
-def test_mg_search():
-    CURLCMD='''curl -F "offset=5" -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "http://api-ui.mg-rast.org/search"'''
+def test_mg_search_feces():
+    CURLCMD='''curl -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "http://api-ui.mg-rast.org/search"'''
     a = check_output(CURLCMD, shell=True)
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert c["total_count"] > 800
 
-# Test that server certificats are ok
+@pytest.mark.parametrize("API_URL", APIS)
+def test_mg_search_utf8(API_URL):
+    URL = API_URL + "/search?all=é"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert "é" in c["url"]   # If API corrupts unicode inputs, this fails
 
+# Test that server certificates are ok
+HEADERS = {'User-Agent':'Mozilla/5.0'}
 def test_cert_shock():
-    req = urllib2.Request("https://shock.mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    req = urllib2.Request("https://shock.mg-rast.org", headers=HEADERS)
     urllib2.urlopen(req)
 
 def test_cert_awe():
-    req = urllib2.Request("https://awe.mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    req = urllib2.Request("https://awe.mg-rast.org", headers=HEADERS)
     urllib2.urlopen(req)
 
 def test_cert_mgrast():
-    req = urllib2.Request("https://mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    req = urllib2.Request("https://mg-rast.org", headers=HEADERS)
     urllib2.urlopen(req)
 
 def test_cert_api():
-    req = urllib2.Request("https://api.mg-rast.org", headers={'User-Agent':'Mozilla/5.0'})
+    req = urllib2.Request("https://api.mg-rast.org", headers=HEADERS)
     urllib2.urlopen(req)

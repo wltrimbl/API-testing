@@ -1,8 +1,8 @@
 from subprocess import check_output
 
 # subset of ~20 example invokations from the API-explorer page  (all GET)
-# http://www.mg-rast.org/mgmain.html?mgpage=api 
-# mangled by hand into 
+# http://www.mg-rast.org/mgmain.html?mgpage=api
+# mangled by hand into
 
 def test_apix_annotation_similarity():
     CALL = '''curl 'http://api-ui.mg-rast.org/annotation/similarity/mgm4447943.3?id=mgm4447943.3&identity=80&no_cutoffs=0&source=KO&type=function' | head  '''
