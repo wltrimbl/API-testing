@@ -66,7 +66,7 @@ def test_metagenome_validjson(API_URL):
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
     c = json.loads(b)
-    assert len(c["name"])  > 4
+    assert len(c["name"]) > 4
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metadata_export_utf8(API_URL):

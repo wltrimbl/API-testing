@@ -9,10 +9,19 @@ if 'MGRKEY' in os.environ:
 else:
     assert False, "This test does not work without MGRKEY"
 
-API_URL = "https://api.mg-rast.org/"
+def read_api_list(filename):
+    server_list = []
+    if not os.path.isfile(filename):
+        return ["http://api.mg-rast.org", "https://api.mg-rast.org"]
+    for l in open(filename).readlines():
+        server_list.append(l.strip())
+    return server_list
+
+APIS = read_api_list("API.server.list")
 
 @pytest.mark.requires_auth
-def test_upload0():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_upload0(API_URL):
     CMD = '''curl -s -X POST -H "Authorization: mgrast " -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
@@ -21,7 +30,8 @@ def test_upload0():
     assert b"ERROR" in o
 
 @pytest.mark.requires_auth
-def test_upload_auth0():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_upload_auth0(API_URL):
     CMD = '''curl -s -X POST -H "auth: {}" -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
@@ -30,14 +40,16 @@ def test_upload_auth0():
     assert b"ERROR" not in o
 
 @pytest.mark.requires_auth
-def test_upload1():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_upload1(API_URL):
     CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
 
 @pytest.mark.requires_auth
-def test_upload_and_validate():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_upload_and_validate(API_URL):
     CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
@@ -54,7 +66,8 @@ def test_upload_and_validate():
 
 
 @pytest.mark.requires_auth
-def test_fastq_upload_and_validate():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_fastq_upload_and_validate(API_URL):
     CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@data/Sample.DM.fastq.gz" "{}/inbox"'''.format(MGRKEY, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
@@ -72,7 +85,8 @@ def test_fastq_upload_and_validate():
     assert "awe_id" in j2.keys()
 
 @pytest.mark.requires_auth
-def test_searchapi_loggedin_morethan_loggedout():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_searchapi_loggedin_morethan_loggedout(API_URL):
     CALL = '''curl -s -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=building" "{}/search"'''.format(API_URL)
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
@@ -88,7 +102,8 @@ def test_searchapi_loggedin_morethan_loggedout():
     assert hits_loggedin >= hits
 
 @pytest.mark.requires_auth
-def test_searchapi_loggedin_morethan_loggedoutb_pub1():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_searchapi_loggedin_morethan_loggedoutb_pub1(API_URL):
     CALL = '''curl  -s -F "limit=5" -F "public=1" -F "order=created_on" -F "direction=asc" -F "feature=building" "{}/search"'''.format(API_URL)
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
@@ -105,7 +120,8 @@ def test_searchapi_loggedin_morethan_loggedoutb_pub1():
     assert hits_loggedin >= hits
 
 @pytest.mark.requires_auth
-def test_searchapi_loggedin_morethan_loggedoutb_pub0():
+@pytest.mark.parametrize("API_URL", APIS)
+def test_searchapi_loggedin_morethan_loggedoutb_pub0(API_URL):
     CALL = '''curl  -s -F "limit=5" -F "public=0" -F "order=created_on" -F "direction=asc" "{}/search"'''.format(API_URL)
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a

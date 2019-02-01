@@ -9,10 +9,11 @@ if 'MGRKEY' in os.environ:
 else:
     assert False, "This test does not work without MGRKEY"
 
+API_URL = "https://api.mg-rast.org/"
 
 def get_proj_metadata(proj, field):
     '''Connect to MG-RAST API, authorize, and read project metadata.'''
-    TESTURL = "http://api.mg-rast.org/project/{PROJ}".format(PROJ=proj)
+    TESTURL = API_URL + "/project/{PROJ}".format(PROJ=proj)
     TESTDATA = {"verbosity":"full", "nocache":1}
     TESTHEADERS = {"Authorization": "mgrast {MGRKEY}".format(MGRKEY=MGRKEY)}
 #    print(TESTURL, TESTDATA, TESTHEADERS)
@@ -24,7 +25,7 @@ def get_proj_metadata(proj, field):
 def set_proj_metadata(proj, terms):
     '''Connect to MG-RAST API, authorize, and change one or more fields
     of project metadata.'''
-    SETURL = "http://api-ui.mg-rast.org/project/{PROJ}/updatemetadata".format(PROJ=proj)
+    SETURL = API_URL + "/project/{PROJ}/updatemetadata".format(PROJ=proj)
     SETHEADERS = {"Authorization": "mgrast {MGRKEY}".format(MGRKEY=MGRKEY)}
     # Convert data into the pecuilar syntax needed for requests.post to send
     # multipart/form-data without files:
