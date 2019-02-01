@@ -42,7 +42,7 @@ def test_project_validjson(API_URL):
     b = a.decode("utf-8")   # fails if Latin-1
     assert "ERROR" not in b
     c = json.loads(b)  # fails if JSON corrupt
-    assert "mgp128/project" in c["url"]
+    assert "project/mgp128" in c["url"]
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metagenome_noerror(API_URL):
@@ -73,7 +73,7 @@ def test_metadata_export_utf8(API_URL):
     URL = API_URL + "/metadata/export/mgp128"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
-    assert "export/mgp128" in b["url"]
+    assert "mgp128" in b
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_download_partial(API_URL):
@@ -185,8 +185,9 @@ def test_mixs_schema(API_URL):
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
 
-def test_mg_search_feces():
-    CURLCMD = '''curl -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "http://api-ui.mg-rast.org/search"'''
+@pytest.mark.parametrize("API_URL", APIS)
+def test_mg_search_feces(API_URL):
+    CURLCMD = '''curl -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "{}/search"'''.format(API_URL)
     a = check_output(CURLCMD, shell=True)
     b = a.decode("utf-8")
     c = json.loads(b)
