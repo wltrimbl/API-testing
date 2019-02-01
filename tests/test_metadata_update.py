@@ -15,14 +15,14 @@ else:
     assert False, "This test does not work without MGRKEY"
 
 def metadata_update(proj, filename):
-    h = check_output('curl -X POST -F "upload=@{FILENAME}" "http://api.metagenomics.anl.gov/metadata/update" -H "Authorization: mgrast {MGRKEY}" -F "metagenome={METAGENOME}" -F "project={PROJECT}"'.format(FILENAME=filename, MGRKEY=MGRKEY, PROJECT=proj, METAGENOME="mgm4450397.3"), shell=True)
+    h = check_output('curl -s -X POST -F "upload=@{FILENAME}" "http://api.metagenomics.anl.gov/metadata/update" -H "Authorization: mgrast {MGRKEY}" -F "metagenome={METAGENOME}" -F "project={PROJECT}"'.format(FILENAME=filename, MGRKEY=MGRKEY, PROJECT=proj, METAGENOME="mgm4450397.3"), shell=True)
     assert "ERROR" not in h.decode("utf-8")
     print(h)
     return(h)
 #curl -X POST -F "upload=@FIXTURE-mgp28785-unicode.xlsx" "http://api.metagenomics.anl.gov/metadata/update" -H "Authorization: mgrast $MGRKEY"  -F "metagenome=mgm4514697.3" -F "project=mgp28785"
 
 def metadata_import(proj, filename):
-    h = check_output('curl -X POST -F "upload=@{FILENAME}" "http://api.metagenomics.anl.gov/metadata/import" -H "Authorization: mgrast {MGRKEY}" -F "metagenome=mgm4514697.3" -F "project={PROJECT}"'.format(FILENAME=filename, MGRKEY=MGRKEY, PROJECT=proj), shell=True)
+    h = check_output('curl -s -X POST -F "upload=@{FILENAME}" "http://api.metagenomics.anl.gov/metadata/import" -H "Authorization: mgrast {MGRKEY}" -F "metagenome=mgm4514697.3" -F "project={PROJECT}"'.format(FILENAME=filename, MGRKEY=MGRKEY, PROJECT=proj), shell=True)
     assert "ERROR" not in h.decode("utf-8")
     return(h)
 
