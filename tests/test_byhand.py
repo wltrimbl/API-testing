@@ -194,10 +194,18 @@ def test_mg_search_feces(API_URL):
     assert c["total_count"] > 800
 
 @pytest.mark.parametrize("API_URL", APIS)
+def test_mg_search_utf8_debug(API_URL):
+    URL = API_URL + "/search?all=é&debug=true"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")
+    assert "é" in b
+
+@pytest.mark.parametrize("API_URL", APIS)
 def test_mg_search_utf8(API_URL):
     URL = API_URL + "/search?all=é"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")
+    assert "é" in b
     c = json.loads(b)
     assert "é" in c["url"]   # If API corrupts unicode inputs, this fails
 
