@@ -8,6 +8,7 @@ import pytest
 import requests
 
 DATADIR = dirname(abspath(__file__)) + "/data/"
+
 API_URL = "http://api-dev.metagenomics.anl.gov/"
 
 if 'MGRKEY' in os.environ:

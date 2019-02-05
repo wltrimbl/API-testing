@@ -1,6 +1,6 @@
-import os
 import re
 import json
+import os
 from os.path import dirname, abspath
 from subprocess import check_output
 import pytest

@@ -1,7 +1,7 @@
 import os
 from subprocess import check_output
-import pytest
 import json
+import pytest
 
 try:
     import urllib2 #python2
