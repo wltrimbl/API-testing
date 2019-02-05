@@ -1,8 +1,11 @@
 import os
 import re
 import json
+from os.path import dirname, abspath
 from subprocess import check_output
 import pytest
+
+DATADIR = dirname(abspath(__file__)) + "/data/"
 
 if 'MGRKEY' in os.environ:
     MGRKEY = os.environ['MGRKEY']
@@ -22,7 +25,7 @@ APIS = read_api_list("API.server.list")
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_upload0(API_URL):
-    CMD = '''curl -s -X POST -H "Authorization: mgrast " -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(API_URL)
+    CMD = '''curl -s -X POST -H "Authorization: mgrast " -F "upload=@{}/metadata.simple.xlsx" "{}/inbox"'''.format(DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
@@ -32,7 +35,7 @@ def test_upload0(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_upload_auth0(API_URL):
-    CMD = '''curl -s -X POST -H "auth: {}" -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, API_URL)
+    CMD = '''curl -s -X POST -H "auth: {}" -F "upload=@{}/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
@@ -42,7 +45,7 @@ def test_upload_auth0(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_upload1(API_URL):
-    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, API_URL)
+    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@{}/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
@@ -50,7 +53,7 @@ def test_upload1(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_upload_and_validate(API_URL):
-    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@data/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, API_URL)
+    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@{}/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
     assert b"ERROR" not in o
@@ -68,7 +71,7 @@ def test_upload_and_validate(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_fastq_upload_and_validate(API_URL):
-    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@data/Sample.DM.fastq.gz" "{}/inbox"'''.format(MGRKEY, API_URL)
+    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@{}/Sample.DM.fastq.gz" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
     assert b"ERROR" not in o
