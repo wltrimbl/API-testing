@@ -3,11 +3,6 @@ from subprocess import check_output
 import json
 import pytest
 
-try:
-    import urllib2 #python2
-except:
-    import urllib.request as urllib2 #python3
-
 # These tests should be quick
 
 # Rotate through API servers listed in API.server.list
@@ -130,6 +125,7 @@ def test_errs_profile(API_URL):
     URL = API_URL + "/profile/mgm4447943.3?source=RefSeq&format=biom"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
+
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_matrix_organism(API_URL):
     URL = API_URL + "/matrix/organism?id=mgm4447943.3&id=mgm4447192.3&id=mgm4447102.3&group_level=family&source=RefSeq&evalue=15"
@@ -155,6 +151,7 @@ def test_errs_download_history(API_URL):
     URL = API_URL + "/download/history/mgm4447943.3"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
+    assert b"mgm4447943.3.299.screen.passed.fna" in a 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_err_post_parsing_err(API_URL):
     CURLCMD = '''curl -sS -d '{"data":"000821a2e2f63df1a3873e4b280002a8","format":"fasta","sequence":0,"source":"InterPro"}' ''' + API_URL + '''/m5nr/md5'''
@@ -184,6 +181,7 @@ def test_mixs_schema(API_URL):
     URL = API_URL + "/mixs/schema"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
+    assert b"PI_organization_country" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_mg_search_feces(API_URL):
@@ -209,20 +207,3 @@ def test_mg_search_utf8(API_URL):
     c = json.loads(b)
     assert "é" in c["url"]   # If API corrupts unicode inputs, this fails
 
-# Test that server certificates are ok
-HEADERS = {'User-Agent':'Mozilla/5.0'}
-def test_cert_shock():
-    req = urllib2.Request("https://shock.mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
-
-def test_cert_awe():
-    req = urllib2.Request("https://awe.mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
-
-def test_cert_mgrast():
-    req = urllib2.Request("https://mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
-
-def test_cert_api():
-    req = urllib2.Request("https://api.mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
