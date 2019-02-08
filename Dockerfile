@@ -2,13 +2,17 @@
 
 # docker build -t mgrast/api-testing .
 
-FROM debian:stretch
+#FROM debian:stretch
+FROM alpine:3.9
 
-RUN apt-get update && apt-get install -y make curl python python-pip
+#RUN apt-get update && apt-get install -y make curl python3 python3-pip
+RUN apk update ; apk add make curl python3
 
-RUN pip install --upgrade pip
 
-RUN pip install pytest pytest-json
+RUN pip3 install --upgrade pip
+
+RUN pip3 install pytest pytest-json
+
 
 COPY . /root/
 
