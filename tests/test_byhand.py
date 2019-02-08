@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import os
 from subprocess import check_output
 import json
 import pytest
+
 
 # These tests should be quick
 
