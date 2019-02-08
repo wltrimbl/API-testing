@@ -72,7 +72,7 @@ def test_metadata_update_xls_nounicode():
     assert v == "No unicode2 here."
 
 @pytest.mark.requires_auth
-@pytest.mark.utf8
+@pytest.mark.editutf8
 def test_metadata_update_xls_unicode():
     FIXTURE = DATADIR+"/FIXTURE-mgp28785-unicode.xlsx"
     PROJECT = "mgp28785"

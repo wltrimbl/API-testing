@@ -22,6 +22,14 @@ def test_searchapi_us_marine():
     c = json.loads(b)
     assert c["total_count"] > 80
 
+def test_searchapi_searchunicode():
+    CALL = '''curl  -F "limit=5" -F "all=*é*" "{}/search"'''.format(API_URL)
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert c["total_count"] > 800  # There are at least this many.. 
+
 def test_searchapi_hmp():
     CALL = '''curl  -F "limit=10" -F "order=created_on" -F "direction=asc" -F "project_name=hmp" "{}/search"'''.format(API_URL)
     a = check_output(CALL, shell=True)

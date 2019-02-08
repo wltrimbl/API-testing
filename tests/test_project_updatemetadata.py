@@ -22,6 +22,7 @@ def get_proj_metadata(proj, field):
     aa = json.loads(a.content.decode("utf-8"))
     assert "ERROR" not in a.content.decode("utf-8")
     return(field, aa["metadata"][field])
+
 @pytest.mark.requires_auth
 def set_proj_metadata(proj, terms):
     '''Connect to MG-RAST API, authorize, and change one or more fields
@@ -51,6 +52,7 @@ def test_project_updatemetadata():
     assert v == "TESTING2"
 
 @pytest.mark.requires_auth
+@pytest.mark.editutf8
 def test_project_updatemetadata_with_utf8():
     '''Update a field of project metadata, confirm its value,
     update it again (with utf-8) and confirm its value.'''
