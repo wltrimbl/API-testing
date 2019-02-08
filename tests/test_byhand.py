@@ -1,12 +1,7 @@
 import os
 from subprocess import check_output
-import pytest
 import json
-
-try:
-    import urllib2 #python2
-except:
-    import urllib.request as urllib2 #python3
+import pytest
 
 # These tests should be quick
 
@@ -40,8 +35,9 @@ def test_project_validjson(API_URL):
     URL = API_URL + '/project/mgp128?verbosity=full'
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
-    c = json.loads(b)  # fails if JSON corrupt
     assert "ERROR" not in b
+    c = json.loads(b)  # fails if JSON corrupt
+    assert "project/mgp128" in c["url"]
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metagenome_noerror(API_URL):
@@ -50,6 +46,7 @@ def test_metagenome_noerror(API_URL):
     assert b"ERROR" not in a
     b = a.decode("utf-8")   # fails if Latin-1
     c = json.loads(b)  # fails if JSON corrupt
+    assert "metagenome/mgm" in c["url"]
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metagenome_utf8(API_URL):
@@ -64,13 +61,14 @@ def test_metagenome_validjson(API_URL):
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
     c = json.loads(b)
-    assert len(c["name"])  > 4
+    assert len(c["name"]) > 4
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metadata_export_utf8(API_URL):
     URL = API_URL + "/metadata/export/mgp128"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
+    assert "mgp128" in b
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_download_partial(API_URL):
@@ -127,6 +125,7 @@ def test_errs_profile(API_URL):
     URL = API_URL + "/profile/mgm4447943.3?source=RefSeq&format=biom"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
+
 @pytest.mark.parametrize("API_URL", APIS)
 def test_errs_matrix_organism(API_URL):
     URL = API_URL + "/matrix/organism?id=mgm4447943.3&id=mgm4447192.3&id=mgm4447102.3&group_level=family&source=RefSeq&evalue=15"
@@ -152,6 +151,7 @@ def test_errs_download_history(API_URL):
     URL = API_URL + "/download/history/mgm4447943.3"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
+    assert b"mgm4447943.3.299.screen.passed.fna" in a 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_err_post_parsing_err(API_URL):
     CURLCMD = '''curl -sS -d '{"data":"000821a2e2f63df1a3873e4b280002a8","format":"fasta","sequence":0,"source":"InterPro"}' ''' + API_URL + '''/m5nr/md5'''
@@ -181,36 +181,29 @@ def test_mixs_schema(API_URL):
     URL = API_URL + "/mixs/schema"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
+    assert b"PI_organization_country" in a
 
-def test_mg_search_feces():
-    CURLCMD='''curl -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "http://api-ui.mg-rast.org/search"'''
+@pytest.mark.parametrize("API_URL", APIS)
+def test_mg_search_feces(API_URL):
+    CURLCMD = '''curl -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "{}/search"'''.format(API_URL)
     a = check_output(CURLCMD, shell=True)
     b = a.decode("utf-8")
     c = json.loads(b)
     assert c["total_count"] > 800
 
 @pytest.mark.parametrize("API_URL", APIS)
+def test_mg_search_utf8_debug(API_URL):
+    URL = API_URL + "/search?all=é&debug=true"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")
+    assert "é" in b
+
+@pytest.mark.parametrize("API_URL", APIS)
 def test_mg_search_utf8(API_URL):
     URL = API_URL + "/search?all=é"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")
+    assert "é" in b
     c = json.loads(b)
     assert "é" in c["url"]   # If API corrupts unicode inputs, this fails
 
-# Test that server certificates are ok
-HEADERS = {'User-Agent':'Mozilla/5.0'}
-def test_cert_shock():
-    req = urllib2.Request("https://shock.mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
-
-def test_cert_awe():
-    req = urllib2.Request("https://awe.mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
-
-def test_cert_mgrast():
-    req = urllib2.Request("https://mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
-
-def test_cert_api():
-    req = urllib2.Request("https://api.mg-rast.org", headers=HEADERS)
-    urllib2.urlopen(req)
