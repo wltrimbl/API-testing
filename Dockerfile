@@ -1,6 +1,8 @@
 # MG-RAST API-testing
 
-FROM debian:jessie
+# docker build -t mgrast/api-testing .
+
+FROM debian:stretch
 
 RUN apt-get update && apt-get install -y make curl python python-pip
 
