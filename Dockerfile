@@ -13,6 +13,10 @@ RUN pip3 install --upgrade pip
 
 RUN pip3 install pytest pytest-json
 
+# ensure backwards compatibility
+RUN apk add --no-cache bash
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 
 COPY . /root/
 
