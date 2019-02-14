@@ -188,7 +188,7 @@ def test_mixs_schema(API_URL):
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_mg_search_feces(API_URL):
-    CURLCMD = '''curl -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "{}/search"'''.format(API_URL)
+    CURLCMD = '''curl -sS -F "limit=5" -F "order=created_on" -F "direction=asc" -F "feature=feces" "{}/search"'''.format(API_URL)
     a = check_output(CURLCMD, shell=True)
     b = a.decode("utf-8")
     c = json.loads(b)
@@ -202,6 +202,14 @@ def test_mg_search_utf8_debug(API_URL):
     assert "é" in b
 
 @pytest.mark.parametrize("API_URL", APIS)
+def test_mg_search_utf8_debug_uA722(API_URL):
+    URL = API_URL + "/search?all=א&debug=true"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")
+    assert "א" in b
+
+
+@pytest.mark.parametrize("API_URL", APIS)
 def test_mg_search_utf8(API_URL):
     URL = API_URL + "/search?all=é"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
@@ -210,3 +218,11 @@ def test_mg_search_utf8(API_URL):
     c = json.loads(b)
     assert "é" in c["url"]   # If API corrupts unicode inputs, this fails
 
+@pytest.mark.parametrize("API_URL", APIS)
+def test_mg_search_utf8_uA722(API_URL):
+    URL = API_URL + "/search?all=א"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")
+    assert "א" in b
+    c = json.loads(b)
+    assert "א" in c["url"]   # If API corrupts unicode inputs, this fails

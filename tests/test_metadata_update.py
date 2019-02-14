@@ -94,6 +94,7 @@ def test_metadata_validate_xls_nounicode(API_URL):
     h = validate_metadata(FIXTURE, API_URL)
     print(h)
     assert b"authentication failed" not in h
+    assert b"ERROR" not in h
     j = json.loads(h.decode("utf-8"))
     assert j["is_valid"] == 1
 
@@ -104,5 +105,6 @@ def test_metadata_validate_xls_unicode(API_URL):
     h = validate_metadata(FIXTURE, API_URL)
     print(h)
     assert b"authentication failed" not in h
+    assert b"ERROR" not in h
     j = json.loads(h.decode("utf-8"))
     assert j["is_valid"] == 1
