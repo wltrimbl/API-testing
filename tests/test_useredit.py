@@ -63,3 +63,25 @@ def test_setusername_set_u0141(API_URL):
     assert j["firstname"] == "Mikołaj"
     CMD = '''curl -s -X PUT '{API_URL}/user/wltrimbl3' -d "firstname=William" -d "lastname=Trimble"  -H "Authorization: mgrast {MGRKEY}"   '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
     o = check_output(CMD, shell=True)
+
+@pytest.mark.requires_auth
+@pytest.mark.editutf8
+@pytest.mark.parametrize("API_URL", APIS)
+def test_setuseremail_set_unicode(API_URL):
+    CMD = '''curl -s -X PUT '{API_URL}/user/wltrimbl3' -d "email=test@nowhere.com"  -H "Authorization: mgrast {MGRKEY}"   '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
+    print(CMD)
+    o = check_output(CMD, shell=True)
+    print(o)
+    assert b"ERROR" not in o
+    j = json.loads(o)
+    CMD = '''curl -s -X GET '{API_URL}/user/wltrimbl3' -H "Authorization: mgrast {MGRKEY}" '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
+    o = check_output(CMD, shell=True)
+    print(o)
+    assert b"ERROR" not in o
+    j = json.loads(o)
+    assert j["email"] == "test@nowhere.com"  # unicode in follow-up query for user data
+    CMD = '''curl -s -X PUT '{API_URL}/user/wltrimbl3' -d "email=tést2@nowhere.com"   -H "Authorization: mgrast {MGRKEY}"   '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
+    o = check_output(CMD, shell=True)
+    assert b"ERROR" not in o
+    j = json.loads(o)
+    assert j["email"] == "tést2@nowhere.com"  # unicode in follow-up query for user data
