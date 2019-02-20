@@ -133,3 +133,77 @@ def test_searchapi_loggedin_morethan_loggedoutb_pub0(API_URL):
     c = json.loads(b)
     hits_loggedin = c["total_count"]
     assert hits_loggedin >= hits
+
+
+# curl http://api.mg-rast.org/job/rename -H "Authorization: mgrast $MGRKEY" -F 'POSTDATA={"metagenome_id":"mgm4474213.3","name":"HPA illumina sequencing of E. coli strain H112240540 POSTDATA"}'
+@pytest.mark.requires_auth
+@pytest.mark.parametrize("API_URL", APIS)
+def test_job_rename(API_URL):
+    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    print(a)
+    b = a.decode("utf-8")
+    print(b)
+    c = json.loads(b)
+    assert c["status"] == 1
+    # check that it has changed
+    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540"
+    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540 -"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    print(a)
+    b = a.decode("utf-8")
+    print(b)
+    c = json.loads(b)
+    assert c["status"] == 1
+    # check that it has changed
+    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540 -"
+
+# curl http://api.mg-rast.org/job/rename -H "Authorization: mgrast $MGRKEY" -F 'POSTDATA={"metagenome_id":"mgm4474213.3","name":"HPA illumina sequencing of E. coli strain H112240540 POSTDATA"}'
+@pytest.mark.requires_auth  
+@pytest.mark.editutf8
+@pytest.mark.parametrize("API_URL", APIS)
+def test_job_rename_unicode(API_URL):
+    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    print(a)
+    b = a.decode("utf-8")
+    print(b)
+    c = json.loads(b)
+    assert c["status"] == 1
+    # check that it has changed
+    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540"
+    # change it again
+    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540 UNICØDE"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    print(a)
+    b = a.decode("utf-8")
+    print(b)
+    c = json.loads(b)
+    assert c["status"] == 1
+    # check that it has changed
+    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540 UNICØDE"
+
