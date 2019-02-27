@@ -226,3 +226,15 @@ def test_mg_search_utf8_uA722(API_URL):
     assert "א" in b
     c = json.loads(b)
     assert "א" in c["url"]   # If API corrupts unicode inputs, this fails
+
+@pytest.mark.parametrize("API_URL", APIS)
+def test_matrix_distinct_hashes(API_URL):
+    URL = API_URL + "/matrix/organism?id=mgm4447943.3&id=mgm4447192.3&id=mgm4447102.3&group_level=family&source=RefSeq&evalue=15"
+    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    URL2 = API_URL + "/matrix/organism?id=mgm4447943.3&group_level=family&source=RefSeq&evalue=15"
+    a2 = check_output('''curl -sS '{}' '''.format(URL2), shell=True)
+    b2 = a2.decode("utf-8")
+    c2 = json.loads(b2)
+    assert c["id"] != c2["id"]   # hashes must be distinct
