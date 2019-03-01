@@ -23,14 +23,14 @@ def metadata_update(proj, filename, API_URL):
     assert "ERROR" not in h.decode("utf-8")
     print(h)
     return(h)
-#curl -X POST -F "upload=@FIXTURE-mgp28785-unicode.xlsx" "http://api.metagenomics.anl.gov/metadata/update" -H "Authorization: mgrast $MGRKEY"  -F "metagenome=mgm4514697.3" -F "project=mgp28785"
+#curl -X POST -F "upload=@FIXTURE-mgp28785-unicode.xlsx" "http://api.mg-rast.org/metadata/update" -H "Authorization: mgrast $MGRKEY"  -F "metagenome=mgm4514697.3" -F "project=mgp28785"
 
 def metadata_import(proj, filename,API_URL):
     h = check_output('curl -s -X POST -F "upload=@{FILENAME}" "{API_URL}/metadata/import" -H "Authorization: mgrast {MGRKEY}" -F "metagenome=mgm4514697.3" -F "project={PROJECT}"'.format(FILENAME=filename, API_URL=API_URL, MGRKEY=MGRKEY, PROJECT=proj), shell=True)
     assert "ERROR" not in h.decode("utf-8")
     return(h)
 
-#curl -X POST -F "upload=@mgp87606.xls" "http://api.metagenomics.anl.gov/metadata/validate"
+#curl -X POST -F "upload=@mgp87606.xls" "http://api.mg-rast.org/metadata/validate"
 def validate_metadata(filename,API_URL):
     h = check_output('curl -X POST -F "upload=@{FILENAME}" "{API_URL}/metadata/validate"'.format(FILENAME=filename, API_URL=API_URL), shell=True)
     return h
