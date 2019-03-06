@@ -171,7 +171,7 @@ def test_job_rename(API_URL):
     assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540 -"
 
 # curl http://api.mg-rast.org/job/rename -H "Authorization: mgrast $MGRKEY" -F 'POSTDATA={"metagenome_id":"mgm4474213.3","name":"HPA illumina sequencing of E. coli strain H112240540 POSTDATA"}'
-@pytest.mark.requires_auth  
+@pytest.mark.requires_auth
 @pytest.mark.editutf8
 @pytest.mark.parametrize("API_URL", APIS)
 def test_job_rename_unicode(API_URL):
@@ -207,3 +207,20 @@ def test_job_rename_unicode(API_URL):
     c = json.loads(b)
     assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540 UNICØDE"
 
+@pytest.mark.requires_auth
+@pytest.mark.parametrize("API_URL", APIS)
+def test_job_submit_parseerror(API_URL):
+    CALL = '''curl  -s  --data '{"seq_files":["f673dbfc","2df84ea1"],"project_name":"test project"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/submission/submit'''
+    a = check_output(CALL, shell=True)
+    print(a)
+    assert not b"No sequence files provided" in a
+    assert not b"invalid webkey" in a
+
+@pytest.mark.requires_auth
+@pytest.mark.parametrize("API_URL", APIS)
+def test_job_submit_parseerror_debug(API_URL):
+    CALL = '''curl  -s  --data '{"seq_files":["f673dbfc","2df84ea1"],"project_name":"test project", "debug":"1"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/submission/submit'''
+    a = check_output(CALL, shell=True)
+    print(a)
+    assert not b"No sequence files provided" in a
+    assert not b"invalid webkey" in a
