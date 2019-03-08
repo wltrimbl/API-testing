@@ -3,6 +3,7 @@ import json
 import os
 from os.path import dirname, abspath
 from subprocess import check_output
+import requests
 import pytest
 
 from test_byhand import read_api_list
@@ -224,3 +225,15 @@ def test_job_submit_parseerror_debug(API_URL):
     print(a)
     assert not b"No sequence files provided" in a
     assert not b"invalid webkey" in a
+
+@pytest.mark.requires_auth
+@pytest.mark.parametrize("API_URL", APIS)
+def test_user_list_limited(API_URL): 
+    TESTURL = API_URL + "/user?limit=2&verbosity=minimal"
+    TESTHEADERS = {"Authorization": "mgrast {}".format(MGRKEY)}
+    response = requests.get(TESTURL, headers=TESTHEADERS) 
+    print(response.content.decode("utf-8"))
+    data = json.loads(response.content.decode("utf-8")) 
+    assert 'insufficient permissions' not in response.content.decode("utf-8")
+    assert len(data["data"]) <= 2
+

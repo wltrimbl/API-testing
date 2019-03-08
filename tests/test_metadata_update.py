@@ -47,7 +47,7 @@ def get_proj_metadata(proj, field, API_URL):
 def set_proj_metadata(proj, terms, API_URL):
     SETURL = API_URL + "/project/mgp119/updatemetadata"
     TESTHEADERS = {"Authorization": "mgrast {MGRKEY}".format(MGRKEY=MGRKEY)}
-    # Convert data into the pecuilar syntax needed for requests.post to send
+    # Convert data into the peculiar syntax needed for requests.post to send
     # multipart/form-data without files:
     SETDATA = {k : (None, v)  for k, v in terms.items()}
 #    print(SETURL, SETHEADERS, SETDATA)
