@@ -48,20 +48,19 @@ def test_upload1(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_upload_and_validate(API_URL):
-    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@{}/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
+    CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@{}/FIXTURE-ONE-nounicode.xlsx" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
     assert b"ERROR" not in o
     j = json.loads(o)
     ID = re.findall(r"\((.*)\)", j["status"])[0]
     print(ID)
-    assert "metadata.simple.xlsx" in j["status"]
+    assert "FIXTURE-ONE-nounicode.xlsx" in j["status"]
     CMD = '''curl -X GET -H "Authorization: mgrast {}" "{}/inbox/validate/{}"'''.format(MGRKEY, API_URL, ID)
     o2 = check_output(CMD, shell=True)
     assert b"ERROR" not in o2
     j2 = json.loads(o2)
     assert j2["status"] == "valid metadata"
-
 
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
@@ -140,73 +139,32 @@ def test_searchapi_loggedin_morethan_loggedoutb_pub0(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_job_rename(API_URL):
-    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
+    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4845247.3", "name":"TÉSTINGFIXTURE1"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
     a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    print(a)
+    assert not b"ERROR" in a, a
     b = a.decode("utf-8")
-    print(b)
+    c = json.loads(b)
+    assert c["status"] == 1, c
+    # check that it has changed
+    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4845247.3?nocache=1'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a, a
+    b = a.decode("utf-8")
+    c = json.loads(b)
+    assert c["name"] == "TÉSTINGFIXTURE1", c
+    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4845247.3", "name":"TESTINGFIXTURE1"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
+    a = check_output(CALL, shell=True)
+    assert not b"ERROR" in a, a
+    b = a.decode("utf-8")
     c = json.loads(b)
     assert c["status"] == 1
     # check that it has changed
-    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
+    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4845247.3?nocache=1'''
     a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
+    assert not b"ERROR" in a, a
     b = a.decode("utf-8")
     c = json.loads(b)
-    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540"
-    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540 -"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    print(a)
-    b = a.decode("utf-8")
-    print(b)
-    c = json.loads(b)
-    assert c["status"] == 1
-    # check that it has changed
-    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    b = a.decode("utf-8")
-    c = json.loads(b)
-    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540 -"
-
-# curl http://api.mg-rast.org/job/rename -H "Authorization: mgrast $MGRKEY" -F 'POSTDATA={"metagenome_id":"mgm4474213.3","name":"HPA illumina sequencing of E. coli strain H112240540 POSTDATA"}'
-@pytest.mark.requires_auth
-@pytest.mark.editutf8
-@pytest.mark.parametrize("API_URL", APIS)
-def test_job_rename_unicode(API_URL):
-    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    print(a)
-    b = a.decode("utf-8")
-    print(b)
-    c = json.loads(b)
-    assert c["status"] == 1
-    # check that it has changed
-    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    b = a.decode("utf-8")
-    c = json.loads(b)
-    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540"
-    # change it again
-    CALL = '''curl  -s -F 'POSTDATA={"metagenome_id":"mgm4474213.3", "name":"HPA illumina sequencing of E. coli strain H112240540 UNICØDE"}' -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/job/rename'''
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    print(a)
-    b = a.decode("utf-8")
-    print(b)
-    c = json.loads(b)
-    assert c["status"] == 1
-    # check that it has changed
-    CALL = '''curl  -s -H "Authorization: mgrast '''+MGRKEY + '" ' + API_URL + '''/metagenome/mgm4474213.3?nocache=1'''
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    b = a.decode("utf-8")
-    c = json.loads(b)
-    assert c["name"] == "HPA illumina sequencing of E. coli strain H112240540 UNICØDE"
+    assert c["name"] == "TESTINGFIXTURE1", c
 
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
@@ -225,15 +183,4 @@ def test_job_submit_parseerror_debug(API_URL):
     print(a)
     assert not b"No sequence files provided" in a
     assert not b"invalid webkey" in a
-
-@pytest.mark.requires_auth
-@pytest.mark.parametrize("API_URL", APIS)
-def test_user_list_limited(API_URL): 
-    TESTURL = API_URL + "/user?limit=2&verbosity=minimal"
-    TESTHEADERS = {"Authorization": "mgrast {}".format(MGRKEY)}
-    response = requests.get(TESTURL, headers=TESTHEADERS) 
-    print(response.content.decode("utf-8"))
-    data = json.loads(response.content.decode("utf-8")) 
-    assert 'insufficient permissions' not in response.content.decode("utf-8")
-    assert len(data["data"]) <= 2
 
