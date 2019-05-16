@@ -14,7 +14,6 @@ if 'MGRKEY' in os.environ:
 else:
     assert False, "This test does not work without MGRKEY"
 
-
 def get_proj_metadata(proj, field, API_URL):
     '''Connect to MG-RAST API, authorize, and read project metadata.'''
     TESTURL = API_URL + "/project/{PROJ}".format(PROJ=proj)
@@ -43,7 +42,7 @@ def set_proj_metadata(proj, terms, API_URL):
 def test_project_updatemetadata(API_URL):
     '''Update a field of project metadata, confirm its value,
     update it again (with utf-8) and confirm its value.'''
-    PROJECT = "mgp34834"  # This is a garbage project
+    PROJECT = "mgp89431"  # This project is a testing fixture
     FIELD = "organization_url"
     set_proj_metadata(PROJECT, {FIELD: "TESTING"}, API_URL)
     f, v = get_proj_metadata(PROJECT, FIELD, API_URL)
@@ -60,7 +59,7 @@ def test_project_updatemetadata(API_URL):
 def test_project_updatemetadata_with_utf8(API_URL):
     '''Update a field of project metadata, confirm its value,
     update it again (with utf-8) and confirm its value.'''
-    PROJECT = "mgp34834"  # This is a garbage project
+    PROJECT = "mgp89431"  # This project is a testing fixture
     FIELD = "organization_url"
     set_proj_metadata(PROJECT, {FIELD: "TESTING"}, API_URL)
     f, v = get_proj_metadata(PROJECT, FIELD, API_URL)
@@ -81,7 +80,7 @@ def test_project_updatemetadata_with_utf8(API_URL):
 def test_project_updatemetadata_with_utf8_U_0634(API_URL):
     '''Update a field of project metadata, confirm its value,
     update it again (with utf-8) and confirm its value.'''
-    PROJECT = "mgp34834"  # This is a garbage project
+    PROJECT = "mgp89431"  # This  proejct is a testing fixture
     FIELD = "organization_url"
     set_proj_metadata(PROJECT, {FIELD: "TESTING"}, API_URL)
     f, v = get_proj_metadata(PROJECT, FIELD, API_URL)
