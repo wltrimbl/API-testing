@@ -21,12 +21,12 @@ APIS = read_api_list("API.server.list")
 def test_setusername_return(API_URL):
     CMD = '''curl -s -X PUT '{API_URL}/user/testinguser' -d "firstname=Tésting" -d "lastname=Üser"  -H "Authorization: mgrast {MGRKEY}"   '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
     o = check_output(CMD, shell=True)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, o
     j = json.loads(o)
     assert j["lastname"] == "Üser"  # unicode in json response
     CMD = '''curl -s -X PUT '{API_URL}/user/testinguser' -d "firstname=Testing" -d "lastname=User"  -H "Authorization: mgrast {MGRKEY}"   '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
     o = check_output(CMD, shell=True)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, o
     j = json.loads(o)
     assert j["lastname"] == "User"  # unicode in json response
 
@@ -38,12 +38,12 @@ def test_setusername_set(API_URL):
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, o
     j = json.loads(o)
     CMD = '''curl -s -X GET '{API_URL}/user/testinguser' -H "Authorization: mgrast {MGRKEY}" '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
     o = check_output(CMD, shell=True)
     print(o)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, o
     j = json.loads(o)
     assert j["lastname"] == "Trimble dépr"  # unicode in follow-up query for user data
 
@@ -55,12 +55,12 @@ def test_setusername_set_u0141(API_URL):
     print(CMD)
     o = check_output(CMD, shell=True)
     print(o)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, o
     j = json.loads(o)
     CMD = '''curl -s -X GET '{API_URL}/user/testinguser' -H "Authorization: mgrast {MGRKEY}" '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
     o = check_output(CMD, shell=True)
     print(o)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, o
     j = json.loads(o)
     assert j["lastname"] == "Wiśniewski"  # unicode in follow-up query for user data
     assert j["firstname"] == "Mikołaj"

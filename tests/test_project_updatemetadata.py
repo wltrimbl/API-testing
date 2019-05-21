@@ -35,7 +35,7 @@ def set_proj_metadata(proj, terms, API_URL):
     SETDATA = {key : (None, val)  for key, val in terms.items()}
 #    print(SETURL, SETHEADERS, SETDATA)
     b = requests.post(SETURL, headers=SETHEADERS, files=SETDATA)
-    print(b.content.decode("utf-8"))
+    assert "ERROR" not in b.content.decode("utf-8"), b.content.decode("utf-8") 
 
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
