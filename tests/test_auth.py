@@ -98,7 +98,6 @@ def test_searchapi_loggedin_morethan_loggedout(API_URL):
 #    c = json.loads(b)
 #    hits_loggedin = c["total_count"]
 #    assert hits_loggedin >= hits
-
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 def test_searchapi_loggedin_morethan_loggedoutb_pub1(API_URL):
@@ -113,23 +112,6 @@ def test_searchapi_loggedin_morethan_loggedoutb_pub1(API_URL):
     assert not b"ERROR" in a
     b = a.decode("utf-8")
     print(b)
-    c = json.loads(b)
-    hits_loggedin = c["total_count"]
-    assert hits_loggedin >= hits
-
-@pytest.mark.requires_auth
-@pytest.mark.parametrize("API_URL", APIS)
-def test_searchapi_loggedin_morethan_loggedoutb_pub0(API_URL):
-    CALL = '''curl  -s -F "limit=5" -F "public=0" -F "order=created_on" -F "direction=asc" "{}/search"'''.format(API_URL)
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    b = a.decode("utf-8")
-    c = json.loads(b)
-    hits = c["total_count"]
-    CALL = '''curl  -s -F "limit=5" -F "public=0" -F "order=created_on" -F "direction=asc" -H "Authorization: mgrast {}" "{}/search"'''.format(MGRKEY, API_URL)
-    a = check_output(CALL, shell=True)
-    assert not b"ERROR" in a
-    b = a.decode("utf-8")
     c = json.loads(b)
     hits_loggedin = c["total_count"]
     assert hits_loggedin >= hits

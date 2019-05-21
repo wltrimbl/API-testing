@@ -53,7 +53,7 @@ def metadata_update(proj, filename, metagenome, API_URL):
     return(h)
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_metadata_update_comma(API_URL):
+def test_metadata_update_comma_samplemetadata(API_URL):
     CALL = 'curl -s -X POST -F "upload=@{FILENAME}" "{API_URL}/metadata/update" -H "Authorization: mgrast {MGRKEY}" -F "metagenome=mgm4845280.3,mgm4845282.3,mgm4845278.3" -F "project={PROJECT}"'.format(FILENAME=DATADIR+"FIXTURE-THREE-nounicode.xlsx", MGRKEY=MGRKEY, PROJECT="mgp89432", API_URL=API_URL)
     h = check_output(CALL, shell=True)
     assert "ERROR" not in h.decode("utf-8")
@@ -78,13 +78,13 @@ def test_metadata_update_comma(API_URL):
     assert m["sample"]["data"]["misc_param"]["value"] == "TEST_BBB"
 
 @pytest.mark.parametrize("API_URL", APIS)
-def test_metadata_update_double(API_URL):
+def test_metadata_update_double_samplemetadata(API_URL):
     h = check_output('curl -s -X POST -F "upload=@{FILENAME}" "{API_URL}/metadata/update" -H "Authorization: mgrast {MGRKEY}" -F "metagenome={METAGENOME}" -F "metagenome={MG2}" -F "project={PROJECT}"'.format(FILENAME=DATADIR+"FIXTURE-THREE-nounicode.xlsx", MGRKEY=MGRKEY, PROJECT="mgp89432", METAGENOME="mgm4845280.3", MG2="mgm4845282.3", API_URL=API_URL), shell=True)
     assert "ERROR" not in h.decode("utf-8")
     m = metadata_get("mgm4845280.3", API_URL)
-    assert m["sample"]["data"]["misc_param"]["value"] == "TEST_AAA"
+    assert m["sample"]["data"]["misc_param"]["value"] == "TEST_AAA", m
     m = metadata_get("mgm4845282.3", API_URL)
-    assert m["sample"]["data"]["misc_param"]["value"] == "TEST_AAA"
+    assert m["sample"]["data"]["misc_param"]["value"] == "TEST_AAA", m
     h = check_output('curl -s -X POST -F "upload=@{FILENAME}" "{API_URL}/metadata/update" -H "Authorization: mgrast {MGRKEY}" -F "metagenome={METAGENOME}" -F "metagenome={MG2}" -F "project={PROJECT}"'.format(FILENAME=DATADIR+"FIXTURE-THREE-nounicode2.xlsx", MGRKEY=MGRKEY, PROJECT="mgp89432", METAGENOME="mgm4845280.3", MG2="mgm4845282.3", API_URL=API_URL), shell=True)
     assert "ERROR" not in h.decode("utf-8")
     m = metadata_get("mgm4845280.3", API_URL)
@@ -125,7 +125,7 @@ def set_proj_metadata(proj, terms, API_URL):
 @pytest.mark.parametrize("API_URL", APIS)
 @pytest.mark.requires_auth
 @pytest.mark.utf8
-def test_metadata_update_xls_nounicode(API_URL):
+def test_metadata_update_xls_nounicode_projectmetadata(API_URL):
     FIXTURE = DATADIR+"/FIXTURE-ONE-nounicode.xlsx"
     PROJECT = "mgp89431"
     FIELD = "project_description"
@@ -145,7 +145,7 @@ def test_metadata_update_xls_nounicode(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 @pytest.mark.editutf8
-def test_metadata_update_xls_unicode(API_URL):
+def test_metadata_update_xls_unicode_projectmetadata(API_URL):
     FIXTURE = DATADIR+"/FIXTURE-ONE-unicode.xlsx"
     PROJECT = "mgp89431"
     FIELD = "project_description"
@@ -168,7 +168,7 @@ def test_metadata_update_xls_unicode(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)
 @pytest.mark.editutf8
-def test_metadata_update_xls_two(API_URL):
+def test_metadata_update_xls_two_sample_testmetadata(API_URL):
     FIXTURE = DATADIR+"/FIXTURE-THREE-nounicode.xlsx"
     PROJECT = "mgp89432"
     FIELD = "PI_organization_address"
@@ -187,6 +187,29 @@ def test_metadata_update_xls_two(API_URL):
     assert m["sample"]["data"]["misc_param"]["value"] == "TEST_BBB"
     m = metadata_get("mgm4845282.3", API_URL)
     assert m["sample"]["data"]["misc_param"]["value"] == "TEST_BBB"
+
+@pytest.mark.requires_auth
+@pytest.mark.parametrize("API_URL", APIS)
+@pytest.mark.editutf8
+def test_metadata_update_xls_two_sample_testmetagenome(API_URL):
+    FIXTURE = DATADIR+"/FIXTURE-THREE-nounicode.xlsx"
+    PROJECT = "mgp89432"
+    FIELD = "PI_organization_address"
+    h = metadata_update(PROJECT, FIXTURE, "mgm4845280.3,mgm4845282.3,mgm4845278.3", API_URL)
+    assert b"ERROR" not in h
+    # Now verify that metadata has been set
+    m = metagenome_get("mgm4845280.3", API_URL)
+    assert m["sample"]["data"]["misc_param"] == "TEST_AAA"
+    m = metagenome_get("mgm4845282.3", API_URL)
+    assert m["sample"]["data"]["misc_param"] == "TEST_AAA"
+    FIXTURE = DATADIR+"/FIXTURE-THREE-nounicode2.xlsx"
+    h = metadata_update(PROJECT, FIXTURE, "mgm4845280.3,mgm4845282.3,mgm4845278.3", API_URL)
+    assert b"ERROR" not in h
+    # Now verify that metadata has been set
+    m = metagenome_get("mgm4845280.3", API_URL)
+    assert m["sample"]["data"]["misc_param"] == "TEST_BBB"
+    m = metagenome_get("mgm4845282.3", API_URL)
+    assert m["sample"]["data"]["misc_param"] == "TEST_BBB"
 
 @pytest.mark.utf8
 @pytest.mark.parametrize("API_URL", APIS)
