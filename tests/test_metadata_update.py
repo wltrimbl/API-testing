@@ -21,7 +21,10 @@ def metagenome_get(metagenome, API_URL):
     CALL = 'curl -s -X GET "{API_URL}/metagenome/{}?verbosity=full&nocache=1" -H "Authorization: mgrast {MGRKEY}"'.format(metagenome, API_URL=API_URL, MGRKEY=MGRKEY)
     print(CALL)
     h = check_output(CALL, shell=True) 
-    b = json.loads(h.decode("utf-8"))
+    try:
+        b = json.loads(h.decode("utf-8"))
+    except json.decoder.JSONDecodeError:
+        assert False, "JSONDecodeError:" + h.decode("utf-8")
     assert "metadata" in b.keys(), b
     assert b["metadata"] is not None
     return(b["metadata"]) 
@@ -35,8 +38,9 @@ def metadata_get(metagenome, API_URL):
     return(b) 
  
 def metadata_update(proj, filename, metagenome, API_URL):
-    h = check_output('curl -s -X POST -F "upload=@{FILENAME}" "{API_URL}/metadata/update" -H "Authorization: mgrast {MGRKEY}" -F "metagenome={METAGENOME}" -F "project={PROJECT}"'.format(FILENAME=filename, MGRKEY=MGRKEY, PROJECT=proj, METAGENOME=metagenome, API_URL=API_URL), shell=True)
-    assert "ERROR" not in h.decode("utf-8")
+    CALL = 'curl -s -X POST -F "upload=@{FILENAME}" "{API_URL}/metadata/update" -H "Authorization: mgrast {MGRKEY}" -F "metagenome={METAGENOME}" -F "project={PROJECT}"'.format(FILENAME=filename, MGRKEY=MGRKEY, PROJECT=proj, METAGENOME=metagenome, API_URL=API_URL) 
+    h = check_output(CALL, shell=True)
+    assert "ERROR" not in h.decode("utf-8"), CALL + "\n" + h
     b = json.loads(h.decode("utf-8"))
     assert "added" in b.keys(), b.keys()
     assert len(b["added"]) >= 1, b["added"]

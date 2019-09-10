@@ -1,9 +1,9 @@
+# coding=utf-8
 import re
 import json
 import os
 from os.path import dirname, abspath
 from subprocess import check_output
-import requests
 import pytest
 
 from test_byhand import read_api_list
@@ -32,10 +32,10 @@ def test_upload0(API_URL):
 def test_upload_auth0(API_URL):
     CMD = '''curl -s -X POST -H "auth: {}" -F "upload=@{}/metadata.simple.xlsx" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
-    o = check_output(CMD, shell=True)
+    o = check_output(CMD, shell=True).decode("utf-8")
     print(o)
-    assert b"authentication fail" not in o
-    assert b"ERROR" not in o
+    assert "authentication fail" not in o
+    assert "ERROR" not in o, o + "\n" + CMD
 
 @pytest.mark.requires_auth
 @pytest.mark.parametrize("API_URL", APIS)

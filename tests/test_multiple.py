@@ -1,4 +1,3 @@
-import os
 from subprocess import check_output
 import pytest
 import json

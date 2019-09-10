@@ -56,7 +56,7 @@ def test_metagenome_utf8(API_URL):
     URL = API_URL + "/metagenome/mgm4447943.3?verbosity=metadata"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
-    assert "ERROR" not in b
+    assert "ERROR" not in b, b
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_metagenome_validjson(API_URL):
@@ -64,6 +64,7 @@ def test_metagenome_validjson(API_URL):
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     b = a.decode("utf-8")   # fails if Latin-1
     c = json.loads(b)
+    assert "name" in c.keys(), c
     assert len(c["name"]) > 4
 
 @pytest.mark.parametrize("API_URL", APIS)
@@ -192,7 +193,7 @@ def test_mg_search_feces(API_URL):
     a = check_output(CURLCMD, shell=True)
     b = a.decode("utf-8")
     c = json.loads(b)
-    assert c["total_count"] > 800
+    assert c["total_count"] > 800, c
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_mg_search_utf8_debug(API_URL):
@@ -237,4 +238,5 @@ def test_matrix_distinct_hashes(API_URL):
     a2 = check_output('''curl -sS '{}' '''.format(URL2), shell=True)
     b2 = a2.decode("utf-8")
     c2 = json.loads(b2)
-    assert c["id"] != c2["id"]   # hashes must be distinct
+    assert "id" in c.keys() and "id" in c2.keys(), repr(c) + repr(c2)
+    assert c["id"] != c2["id"], repr(c) + repr(c2)

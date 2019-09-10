@@ -35,6 +35,7 @@ def test_apix_darkmatter_id(API_URL):
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
     aa = json.loads(a.decode("utf-8"))
+    assert "url" in aa.keys(), aa
     assert "download/mgm4447943.3?file=750.1" in aa["url"]
 
 @pytest.mark.parametrize("API_URL", APIS)
@@ -67,6 +68,7 @@ def test_apix_m5nr_accession(API_URL):
     assert not b"ERROR" in a
     assert b"sulfatase" in a
     aa = json.loads(a.decode("utf-8"))
+    assert "total_count" in aa.keys(), aa
     assert aa["total_count"] > 0
 
 @pytest.mark.parametrize("API_URL", APIS)
@@ -82,6 +84,7 @@ def test_apix_m5nr_function(API_URL):
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
     aa = json.loads(a.decode("utf-8"))
+    assert "total_count" in aa.keys(), aa
     assert aa["total_count"] > 100
 
 @pytest.mark.parametrize("API_URL", APIS)
@@ -150,6 +153,7 @@ def test_apix_metagenome_search(API_URL):
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
     aa = json.loads(a.decode("utf-8"))
+    assert "total_count" in aa.keys(), aa
     assert aa["total_count"] > 1000
 
 @pytest.mark.parametrize("API_URL", APIS)
@@ -158,6 +162,7 @@ def test_apix_metagenome(API_URL):
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
     aa = json.loads(a.decode("utf-8"))
+    assert "md5_checksum" in aa.keys(), aa
     assert aa["md5_checksum"] == "c031de380d7961aa820c108443205220"
 
 @pytest.mark.parametrize("API_URL", APIS)
@@ -166,6 +171,7 @@ def test_apix_project_search(API_URL):
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
     aa = json.loads(a.decode("utf-8"))
+    assert "total_count" in aa.keys(), aa
     assert aa["total_count"] > 1000
 
 @pytest.mark.parametrize("API_URL", APIS)
@@ -174,4 +180,5 @@ def test_apix_project_mgp128(API_URL):
     a = check_output(CALL, shell=True)
     assert not b"ERROR" in a
     aa = json.loads(a.decode("utf-8"))
+    assert "metagenomes" in aa.keys(), aa
     assert len(aa["metagenomes"]) > 4
