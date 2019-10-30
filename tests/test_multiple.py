@@ -14,8 +14,9 @@ print(APIS)
 @pytest.mark.parametrize("API_URL", APIS)
 def test_blast_result_http(API_URL):
     URL = API_URL + "/compute/blast/mgm4447943.3?md5=0001c08aa276d154b7696f9758839786"
-    a = check_output('''curl  '{}' '''.format(URL), shell=True)
-    assert b"ERROR" not in a
+    CALL = '''curl  '{}' '''.format(URL)
+    a = check_output(CALL, shell=True)
+    assert b"ERROR" not in a, CALL + "\n" + str(a)
     b = a.decode("utf-8")
-    c = json.loads(b) 
-    assert "BLASTX" in c["data"]["alignment"] 
+    c = json.loads(b)
+    assert "BLASTX" in c["data"]["alignment"]

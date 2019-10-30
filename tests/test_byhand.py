@@ -30,8 +30,9 @@ def test_project_utf8(API_URL):
 @pytest.mark.parametrize("API_URL", APIS)
 def test_project_noerror(API_URL):
     URL = API_URL + '/project/mgp128?verbosity=full'
-    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
-    assert b"ERROR" not in a
+    CALL = '''curl -sS '{}' '''.format(URL)
+    a = check_output(CALL, shell=True)
+    assert b"ERROR" not in a, CALL + "\n" + str(a)
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_project_validjson(API_URL):
@@ -97,15 +98,17 @@ def test_annotation_similarity_POST(API_URL):
 @pytest.mark.parametrize("API_URL", APIS)
 def test_annotation_sequence_GET(API_URL):
     URL = API_URL + "/annotation/sequence/mgm4447943.3?evalue=10&type=organism&source=SwissProt"
-    a = check_output('''curl -sS '{}' | head -n 10 '''.format(URL), shell=True)
-    assert b"ERROR" not in a
+    CALL = '''curl -sS '{}' | head -n 10 '''.format(URL)
+    a = check_output(CALL, shell=True)
+    assert b"ERROR" not in a, CALL + "\n" + str(a)
     assert b"\t" in a
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_blast_result(API_URL):
     URL = API_URL + "/compute/blast/mgm4447943.3?md5=0001c08aa276d154b7696f9758839786"
-    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
-    assert b"ERROR" not in a
+    CALL = '''curl -sS '{}' '''.format(URL)
+    a = check_output(CALL, shell=True)
+    assert b"ERROR" not in a, CALL + "\n" + str(a)
     assert b"alignment" in a
 
 #def test_post1(API_URL):
@@ -155,7 +158,7 @@ def test_errs_download_history(API_URL):
     URL = API_URL + "/download/history/mgm4447943.3"
     a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
     assert b"ERROR" not in a
-    assert b"mgm4447943.3.299.screen.passed.fna" in a 
+    assert b"mgm4447943.3.299.screen.passed.fna" in a
 @pytest.mark.parametrize("API_URL", APIS)
 def test_err_post_parsing_err(API_URL):
     CURLCMD = '''curl -sS -d '{"data":"000821a2e2f63df1a3873e4b280002a8","format":"fasta","sequence":0,"source":"InterPro"}' ''' + API_URL + '''/m5nr/md5'''
@@ -177,8 +180,9 @@ def test_err_post_parsing_correct2(API_URL):
 @pytest.mark.parametrize("API_URL", APIS)
 def test_err_parse_md5_blast(API_URL):
     URL = API_URL + "/compute/blast/mgm4447943.3?asynchronous=0&md5=0001c2703270cc7aec519107b8215b11&rna=0"
-    a = check_output('''curl -sS '{}' '''.format(URL), shell=True)
-    assert b"ERROR" not in a
+    CALL = '''curl -sS '{}' '''.format(URL)
+    a = check_output(CALL, shell=True)
+    assert b"ERROR" not in a, CALL + "\n" + str(a)
 
 @pytest.mark.parametrize("API_URL", APIS)
 def test_mixs_schema(API_URL):

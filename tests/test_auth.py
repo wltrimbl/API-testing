@@ -34,7 +34,7 @@ def test_upload_auth0(API_URL):
     print(CMD)
     o = check_output(CMD, shell=True).decode("utf-8")
     print(o)
-    assert "authentication fail" not in o
+    assert "authentication fail" not in o, CMD
     assert "ERROR" not in o, o + "\n" + CMD
 
 @pytest.mark.requires_auth
@@ -51,14 +51,14 @@ def test_upload_and_validate(API_URL):
     CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@{}/FIXTURE-ONE-nounicode.xlsx" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, CMD
     j = json.loads(o)
     ID = re.findall(r"\((.*)\)", j["status"])[0]
     print(ID)
     assert "FIXTURE-ONE-nounicode.xlsx" in j["status"]
     CMD = '''curl -X GET -H "Authorization: mgrast {}" "{}/inbox/validate/{}"'''.format(MGRKEY, API_URL, ID)
     o2 = check_output(CMD, shell=True)
-    assert b"ERROR" not in o2
+    assert b"ERROR" not in o2, CMD + "\n" + o2
     j2 = json.loads(o2)
     assert j2["status"] == "valid metadata"
 
@@ -68,11 +68,15 @@ def test_fastq_upload_and_validate(API_URL):
     CMD = '''curl -s -X POST -H "Authorization: mgrast {}" -F "upload=@{}/Sample.DM.fastq.gz" "{}/inbox"'''.format(MGRKEY, DATADIR, API_URL)
     print(CMD)
     o = check_output(CMD, shell=True)
-    assert b"ERROR" not in o
+    assert b"ERROR" not in o, CMD
     j = json.loads(o)
-    ID = re.findall(r"\((.*)\)", j["status"])[0]
+    # parse ID out of return object
+    try:
+        ID = re.findall(r"\((.*)\)", j["status"])[0]
+    except IndexError:
+        assert False, CMD + "\n" + repr(j)
     print(ID)
-    assert "Sample.DM.fastq" in j["status"]
+    assert "Sample.DM.fastq" in j["status"], CMD + "\n" + o
     CMD = '''curl -X GET -H "Authorization: mgrast {}" "{}/inbox/stats/{}"'''.format(MGRKEY, API_URL, ID)
     o2 = check_output(CMD, shell=True)
     print(o2)
