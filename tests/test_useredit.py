@@ -50,6 +50,23 @@ def test_setusername_set(API_URL):
 @pytest.mark.requires_auth
 @pytest.mark.editutf8
 @pytest.mark.parametrize("API_URL", APIS)
+def test_setusername_notify(API_URL):
+    CMD = '''curl -s -X PUT '{API_URL}/user/testinguser' -d "firstname=W" -d "lastname=Trımble"  -H "Authorization: mgrast {MGRKEY}"   '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
+    print(CMD)
+    o = check_output(CMD, shell=True)
+    print(o)
+    assert b"ERROR" not in o, o
+    j = json.loads(o)
+    CMD = '''curl -s -X POST '{API_URL}/user/testinguser/notify' -d "subject=Test notification"  -d "body=Test body"  -H "Authorization: mgrast {MGRKEY}" '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
+    o = check_output(CMD, shell=True)
+    print(o)
+    assert b"ERROR" not in o, o
+    j = json.loads(o)
+    assert j["OK"][0:10] == "email sent"  
+
+@pytest.mark.requires_auth
+@pytest.mark.editutf8
+@pytest.mark.parametrize("API_URL", APIS)
 def test_setusername_set_u0141(API_URL):
     CMD = '''curl -s -X PUT '{API_URL}/user/testinguser' -d "firstname=Mikołaj" -d "lastname=Wiśniewski"  -H "Authorization: mgrast {MGRKEY}"   '''.format(API_URL=API_URL, MGRKEY=MGRKEY)
     print(CMD)
